@@ -2,7 +2,7 @@
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist",
-    "module": "commonjs",
+    "module": "es2015",
     "target": "es2020",
     "lib": ["es2020", "dom"],
     "sourceMap": true,
@@ -12,7 +12,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "forceConsistentCasingInFileNames": true
   },
   "include": ["src/**/*"],

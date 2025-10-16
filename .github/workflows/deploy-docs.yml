@@ -1,12 +1,13 @@
 name: Deploy Documentation to GitHub Pages
 
 on:
-  # Runs on releases
-  release:
-    types: [published]
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for manual documentation deployment'
+        required: false
+        default: 'Manual documentation update'
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
@@ -59,3 +60,11 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        
+      - name: Summary
+        run: |
+          echo "## 📚 Documentation Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Documentation successfully deployed to GitHub Pages" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Documentation URL:** ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "📝 **Reason:** ${{ github.event.inputs.reason || 'Manual documentation update' }}" >> $GITHUB_STEP_SUMMARY
+          echo "🕐 **Deployed at:** $(date)" >> $GITHUB_STEP_SUMMARY

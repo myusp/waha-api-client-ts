@@ -8,7 +8,7 @@
  * 4. All available API methods
  */
 
-import { WAHAClient } from './client';
+import { WAHAClient } from '../src/client';
 
 console.log('='.repeat(60));
 console.log('WAHA API Client - Complete Feature Demonstration');

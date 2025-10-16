@@ -1,0 +1,72 @@
+name: Release Please
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: google-github-actions/release-please-action@v4
+        id: release
+        with:
+          release-type: node
+          package-name: waha-api-client-ts
+          
+  publish:
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    
+    permissions:
+      contents: read
+      id-token: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        run: npm run build
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Verify package contents
+        run: |
+          echo "## 📦 Package Contents" >> $GITHUB_STEP_SUMMARY
+          echo "Verifying build outputs..." >> $GITHUB_STEP_SUMMARY
+          ls -la dist/ >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Package size analysis:" >> $GITHUB_STEP_SUMMARY
+          du -h dist/* >> $GITHUB_STEP_SUMMARY
+      
+      - name: Publish to NPM
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Success Summary
+        run: |
+          echo "## 🎉 NPM Package Published Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Package **${{ needs.release-please.outputs.tag_name }}** has been published to NPM" >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **NPM Package:** https://www.npmjs.com/package/waha-api-client-ts" >> $GITHUB_STEP_SUMMARY
+          echo "🕐 **Published at:** $(date)" >> $GITHUB_STEP_SUMMARY

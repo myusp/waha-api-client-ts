@@ -2,7 +2,7 @@
  * Example usage of WAHA API Client
  */
 
-import { WAHAClient } from './client';
+import { WAHAClient } from '../src/client';
 
 // Example: Initialize client with default configuration
 const client = new WAHAClient({
