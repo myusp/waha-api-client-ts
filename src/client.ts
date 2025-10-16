@@ -331,6 +331,202 @@ export class WAHAClient {
     );
   }
 
+  /**
+   * Helper method to extract phone number from chatId
+   * @param chatId - Chat ID (e.g., "1234567890@c.us" or "1234567890@g.us")
+   * @returns Phone number without suffix
+   */
+  private extractPhoneFromChatId(chatId: string): string {
+    // Extract phone number before @ symbol
+    return chatId.split('@')[0];
+  }
+
+  // ==================== 🛡️ Safe Send Methods (Auto-check number status) ====================
+
+  /**
+   * Safely send a text message - checks if number exists before sending
+   * @param params - Message parameters
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendText(params: SendTextParams): Promise<APIResponse<MessageInfo> | null> {
+    const phone = this.extractPhoneFromChatId(params.chatId);
+    const statusResult = await this.checkNumberStatus(phone, params.config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendText(params);
+  }
+
+  /**
+   * Safely send an image message - checks if number exists before sending
+   * @param params - Message parameters
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendImage(params: SendImageParams): Promise<APIResponse<MessageInfo> | null> {
+    const phone = this.extractPhoneFromChatId(params.chatId);
+    const statusResult = await this.checkNumberStatus(phone, params.config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendImage(params);
+  }
+
+  /**
+   * Safely send a file message - checks if number exists before sending
+   * @param params - Message parameters
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendFile(params: SendFileParams): Promise<APIResponse<MessageInfo> | null> {
+    const phone = this.extractPhoneFromChatId(params.chatId);
+    const statusResult = await this.checkNumberStatus(phone, params.config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendFile(params);
+  }
+
+  /**
+   * Safely send a voice message - checks if number exists before sending
+   * @param data - Message data including chatId
+   * @param config - Optional request configuration
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendVoice(data: any, config?: RequestConfig): Promise<any | null> {
+    const phone = this.extractPhoneFromChatId(data.chatId);
+    const statusResult = await this.checkNumberStatus(phone, config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendVoice(data, config);
+  }
+
+  /**
+   * Safely send a video message - checks if number exists before sending
+   * @param data - Message data including chatId
+   * @param config - Optional request configuration
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendVideo(data: any, config?: RequestConfig): Promise<any | null> {
+    const phone = this.extractPhoneFromChatId(data.chatId);
+    const statusResult = await this.checkNumberStatus(phone, config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendVideo(data, config);
+  }
+
+  /**
+   * Safely send a location message - checks if number exists before sending
+   * @param data - Message data including chatId
+   * @param config - Optional request configuration
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendLocation(data: any, config?: RequestConfig): Promise<any | null> {
+    const phone = this.extractPhoneFromChatId(data.chatId);
+    const statusResult = await this.checkNumberStatus(phone, config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendLocation(data, config);
+  }
+
+  /**
+   * Safely send a contact vCard - checks if number exists before sending
+   * @param data - Message data including chatId
+   * @param config - Optional request configuration
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendContactVcard(data: any, config?: RequestConfig): Promise<any | null> {
+    const phone = this.extractPhoneFromChatId(data.chatId);
+    const statusResult = await this.checkNumberStatus(phone, config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendContactVcard(data, config);
+  }
+
+  /**
+   * Safely send a link preview - checks if number exists before sending
+   * @param data - Message data including chatId
+   * @param config - Optional request configuration
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendLinkPreview(data: any, config?: RequestConfig): Promise<any | null> {
+    const phone = this.extractPhoneFromChatId(data.chatId);
+    const statusResult = await this.checkNumberStatus(phone, config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendLinkPreview(data, config);
+  }
+
+  /**
+   * Safely send buttons - checks if number exists before sending
+   * @param data - Message data including chatId
+   * @param config - Optional request configuration
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendButtons(data: any, config?: RequestConfig): Promise<any | null> {
+    const phone = this.extractPhoneFromChatId(data.chatId);
+    const statusResult = await this.checkNumberStatus(phone, config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendButtons(data, config);
+  }
+
+  /**
+   * Safely send a list message - checks if number exists before sending
+   * @param data - Message data including chatId
+   * @param config - Optional request configuration
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendList(data: any, config?: RequestConfig): Promise<any | null> {
+    const phone = this.extractPhoneFromChatId(data.chatId);
+    const statusResult = await this.checkNumberStatus(phone, config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendList(data, config);
+  }
+
+  /**
+   * Safely send a poll - checks if number exists before sending
+   * @param data - Message data including chatId
+   * @param config - Optional request configuration
+   * @returns API response or null if number doesn't exist
+   */
+  async safeSendPoll(data: any, config?: RequestConfig): Promise<any | null> {
+    const phone = this.extractPhoneFromChatId(data.chatId);
+    const statusResult = await this.checkNumberStatus(phone, config);
+    
+    if (!statusResult.exists && !statusResult.numberExists) {
+      return null;
+    }
+    
+    return this.sendPoll(data, config);
+  }
+
   // ==================== 🔑 Auth Methods ====================
 
   /**
