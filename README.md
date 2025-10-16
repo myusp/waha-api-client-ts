@@ -258,7 +258,13 @@ import type {
 
 ## Examples
 
-See [src/example.ts](./src/example.ts) for more detailed examples.
+See [src/example.ts](./src/example.ts) for code examples and [src/demo.ts](./src/demo.ts) for a complete feature demonstration.
+
+To run the demo:
+```bash
+npm install
+npx tsx src/demo.ts
+```
 
 ## License
 
