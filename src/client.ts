@@ -55,9 +55,9 @@ export class WAHAClient {
   /**
    * Merge default config with request-specific overrides
    */
-  private mergeConfig(override?: RequestConfig): Required<Omit<RequestConfig, 'session'>> & { session: string } {
+  private mergeConfig(override?: RequestConfig): { session: string; timeout: number; retryAttempts: number; retryDelay: number } {
     return {
-      session: override?.session || this.config.session || 'default',
+      session: override?.session || this.config.session,
       timeout: override?.timeout || this.config.timeout,
       retryAttempts: override?.retryAttempts || this.config.retryAttempts,
       retryDelay: override?.retryDelay || this.config.retryDelay,

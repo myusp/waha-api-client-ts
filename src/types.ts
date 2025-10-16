@@ -154,8 +154,8 @@ export interface SendFileParams {
 export interface SessionInfo {
   name: string;
   status: string;
-  config?: any;
-  me?: any;
+  config?: Record<string, unknown>;
+  me?: Record<string, unknown>;
 }
 
 /**
@@ -165,7 +165,7 @@ export interface ChatInfo {
   id: string;
   name?: string;
   isGroup?: boolean;
-  participants?: any[];
+  participants?: Array<Record<string, unknown>>;
 }
 
 /**
