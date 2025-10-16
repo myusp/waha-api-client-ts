@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/myusp/waha-api-client-ts/compare/v1.0.0...v1.0.1) (2025-10-16)
+
+
+### Bug Fixes
+
+* regenerate package-lock.json for CI compatibility ([394f5f8](https://github.com/myusp/waha-api-client-ts/commit/394f5f8078d570e0f633cc470ea9f5589c1b6772))
+
 ## 1.0.0 (2025-10-16)
 
 
