@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.2](https://github.com/myusp/waha-api-client-ts/compare/v1.0.1...v1.0.2) (2025-10-16)
+
+
+### Bug Fixes
+
+* resolve Rollup platform dependency issues in CI ([ec6c9e4](https://github.com/myusp/waha-api-client-ts/commit/ec6c9e47d094c6e3e988db9931e3f20c79c2f431))
+* resolve TypeScript and Node.js version issues in CI ([3e9cdd3](https://github.com/myusp/waha-api-client-ts/commit/3e9cdd3d7dba5597939257c25136d1a6d549600d))
+
 ## [1.0.1](https://github.com/myusp/waha-api-client-ts/compare/v1.0.0...v1.0.1) (2025-10-16)
 
 
