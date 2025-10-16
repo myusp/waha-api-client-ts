@@ -295,18 +295,19 @@ await client.sendFile({
 
 ```typescript
 // Create a group
-const group = await client.createGroup({
+const groupResponse = await client.createGroup({
   name: 'My Group',
   participants: ['1234567890@c.us', '0987654321@c.us']
 });
 
-// Add participants
-await client.addGroupParticipants(group.id, {
+// Add participants (use the group ID from the response)
+const groupId = 'group-id@g.us'; // Extract from response
+await client.addGroupParticipants(groupId, {
   participants: ['1111111111@c.us']
 });
 
 // Promote to admin
-await client.promoteGroupParticipant(group.id, {
+await client.promoteGroupParticipant(groupId, {
   participants: ['1234567890@c.us']
 });
 ```
