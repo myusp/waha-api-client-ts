@@ -551,6 +551,34 @@ npm install
 npx tsx src/demo.ts
 ```
 
+## Publishing to NPM
+
+This library is automatically published to NPM when a new release is created. The GitHub Actions workflow handles:
+
+1. Building the TypeScript code
+2. Running tests
+3. Publishing to NPM with provenance
+
+### Setup for NPM Publishing
+
+To enable automatic publishing, you need to:
+
+1. Create an NPM access token:
+   - Go to https://www.npmjs.com/settings/YOUR_USERNAME/tokens
+   - Create a new "Automation" token
+   
+2. Add the token to GitHub repository secrets:
+   - Go to repository Settings → Secrets and variables → Actions
+   - Create a new repository secret named `NPM_TOKEN`
+   - Paste your NPM access token as the value
+
+3. Create a new release:
+   - Go to the repository's Releases page
+   - Click "Create a new release"
+   - Choose or create a tag (e.g., `v1.0.1`)
+   - Publish the release
+   - The GitHub Actions workflow will automatically publish to NPM
+
 ## License
 
 ISC
