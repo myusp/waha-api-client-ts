@@ -122,6 +122,54 @@ async function examples() {
     console.log('Number status:', numberStatus);
     */
 
+    // Example 12: Safe send text (checks number first)
+    console.log('\n12. Safe send text message...');
+    /*
+    const safeSendResult = await client.safeSendText({
+      chatId: '1234567890@c.us',
+      text: 'Hello! This will only be sent if number exists on WhatsApp.',
+    });
+    
+    if (safeSendResult === null) {
+      console.log('Number does not exist on WhatsApp - message not sent');
+    } else {
+      console.log('Message sent successfully:', safeSendResult);
+    }
+    */
+
+    // Example 13: Safe send image (checks number first)
+    console.log('\n13. Safe send image...');
+    /*
+    const safeSendImageResult = await client.safeSendImage({
+      chatId: '1234567890@c.us',
+      file: 'https://example.com/image.jpg',
+      caption: 'Safe send image!',
+    });
+    
+    if (safeSendImageResult === null) {
+      console.log('Number does not exist on WhatsApp - image not sent');
+    } else {
+      console.log('Image sent successfully:', safeSendImageResult);
+    }
+    */
+
+    // Example 14: Safe send file (checks number first)
+    console.log('\n14. Safe send file...');
+    /*
+    const safeSendFileResult = await client.safeSendFile({
+      chatId: '1234567890@c.us',
+      file: 'https://example.com/document.pdf',
+      filename: 'document.pdf',
+      caption: 'Safe send document',
+    });
+    
+    if (safeSendFileResult === null) {
+      console.log('Number does not exist on WhatsApp - file not sent');
+    } else {
+      console.log('File sent successfully:', safeSendFileResult);
+    }
+    */
+
     console.log('\n✓ All examples completed successfully!');
     console.log('\nNote: Examples are commented out to avoid making actual API calls.');
     console.log('Uncomment the examples you want to test with your WAHA API instance.');
