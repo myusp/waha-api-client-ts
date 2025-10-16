@@ -1,0 +1,23 @@
+{
+  "name": "waha-api-client-ts",
+  "version": "1.0.0",
+  "description": "Waha Api Client TS for https://github.com/devlikeapro/waha (unofficial)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "tsx src/example.ts",
+    "prepare": "npm run build"
+  },
+  "keywords": ["waha", "api", "client", "whatsapp", "typescript"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "axios": "^1.12.2"
+  }
+}
