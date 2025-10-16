@@ -647,7 +647,7 @@ When you're ready to publish a new version:
 
 The GitHub Actions workflows will automatically:
 - Build and publish the package to NPM
-- Generate and deploy API documentation to GitHub Pages (available at `https://myusp.github.io/waha-api-client-ts/`)
+- Generate and deploy API documentation to GitHub Pages (available at `https://[YOUR-USERNAME].github.io/waha-api-client-ts/`)
 
 ### Manual Documentation Deployment
 
@@ -661,7 +661,7 @@ You can also manually trigger documentation deployment:
 ### Viewing Documentation
 
 Once deployed, the API documentation will be available at:
-- **GitHub Pages**: https://myusp.github.io/waha-api-client-ts/
+- **GitHub Pages**: `https://[YOUR-USERNAME].github.io/waha-api-client-ts/`
 
 You can also generate documentation locally:
 ```bash
