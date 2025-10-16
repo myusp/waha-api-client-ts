@@ -2,6 +2,8 @@
 
 TypeScript client library for [WAHA (WhatsApp HTTP API)](https://github.com/devlikeapro/waha) - Unofficial
 
+**✨ This library is fully auto-generated and maintained by GitHub Copilot**
+
 ## Features
 
 - ✅ **Complete API Coverage**: All 147 WAHA API endpoints implemented
@@ -12,6 +14,7 @@ TypeScript client library for [WAHA (WhatsApp HTTP API)](https://github.com/devl
 - 🔁 **Automatic Retries**: Built-in retry logic with configurable attempts and delays
 - 📝 **TypeScript**: Fully typed with TypeScript for better development experience
 - 🚀 **Easy to Use**: Simple and intuitive API
+- 🛡️ **Safe Send Methods**: Built-in number verification to prevent blocking
 
 ## Installation
 
@@ -74,6 +77,88 @@ await client.sendText({
   },
 });
 ```
+
+## Safe Send Methods (Avoid Blocking)
+
+To prevent your WhatsApp account from being blocked, it's recommended to check if a number is registered on WhatsApp before sending messages. This library provides "safe send" methods that automatically perform this check before sending.
+
+### Why Use Safe Send?
+
+When you send messages to numbers that don't exist on WhatsApp, it can lead to your account being flagged or blocked. Safe send methods help prevent this by:
+1. Checking if the number is registered on WhatsApp
+2. Only sending the message if the number exists
+3. Returning `null` if the number doesn't exist (instead of sending and potentially getting blocked)
+
+### Available Safe Send Methods
+
+All safe send methods follow the same pattern: they check the number status first, then send only if the number exists.
+
+- `safeSendText()` - Safe version of `sendText()`
+- `safeSendImage()` - Safe version of `sendImage()`
+- `safeSendFile()` - Safe version of `sendFile()`
+- `safeSendVoice()` - Safe version of `sendVoice()`
+- `safeSendVideo()` - Safe version of `sendVideo()`
+- `safeSendLocation()` - Safe version of `sendLocation()`
+- `safeSendContactVcard()` - Safe version of `sendContactVcard()`
+- `safeSendLinkPreview()` - Safe version of `sendLinkPreview()`
+- `safeSendButtons()` - Safe version of `sendButtons()`
+- `safeSendList()` - Safe version of `sendList()`
+- `safeSendPoll()` - Safe version of `sendPoll()`
+
+### Safe Send Usage Examples
+
+```typescript
+// Safe send text message
+const result = await client.safeSendText({
+  chatId: '1234567890@c.us',
+  text: 'Hello!',
+});
+
+if (result === null) {
+  console.log('Number does not exist on WhatsApp - message not sent');
+} else {
+  console.log('Message sent successfully:', result);
+}
+
+// Safe send image
+const imageResult = await client.safeSendImage({
+  chatId: '1234567890@c.us',
+  file: 'https://example.com/image.jpg',
+  caption: 'Check this out!',
+});
+
+if (imageResult === null) {
+  console.log('Number does not exist on WhatsApp - image not sent');
+} else {
+  console.log('Image sent successfully:', imageResult);
+}
+
+// Safe send file
+const fileResult = await client.safeSendFile({
+  chatId: '1234567890@c.us',
+  file: 'https://example.com/document.pdf',
+  filename: 'document.pdf',
+  caption: 'Important document',
+});
+
+if (fileResult === null) {
+  console.log('Number does not exist on WhatsApp - file not sent');
+}
+```
+
+### When to Use Safe Send vs Regular Send
+
+- **Use Safe Send** when:
+  - Sending to numbers from external sources (databases, forms, etc.)
+  - You're not sure if the number is on WhatsApp
+  - You want to prevent blocking
+  - You're doing bulk messaging
+
+- **Use Regular Send** when:
+  - Sending to group chats
+  - Replying to received messages
+  - You're certain the number exists (e.g., from your contact list)
+  - Performance is critical and you've already verified the number
 
 ## API Methods
 
