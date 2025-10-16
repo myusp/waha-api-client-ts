@@ -80,14 +80,26 @@ await client.sendText({
 
 ## Safe Send Methods (Avoid Blocking)
 
-To prevent your WhatsApp account from being blocked, it's recommended to check if a number is registered on WhatsApp before sending messages. This library provides "safe send" methods that automatically perform this check before sending.
+To prevent your WhatsApp account from being blocked, it's recommended to check if a number is registered on WhatsApp before sending messages. This library provides "safe send" methods that automatically implement WhatsApp's anti-blocking best practices.
 
 ### Why Use Safe Send?
 
-When you send messages to numbers that don't exist on WhatsApp, it can lead to your account being flagged or blocked. Safe send methods help prevent this by:
-1. Checking if the number is registered on WhatsApp
-2. Only sending the message if the number exists
-3. Returning `null` if the number doesn't exist (instead of sending and potentially getting blocked)
+When you send messages to numbers that don't exist on WhatsApp, it can lead to your account being flagged or blocked. Safe send methods help prevent this by implementing the following anti-blocking measures:
+
+1. **Number Verification**: Checks if the number is registered on WhatsApp before sending
+2. **Seen Receipt**: Sends a "seen" indicator to appear more human-like
+3. **Typing Indicators**: Shows "typing..." with realistic delays based on message type and length
+4. **Random Delays**: Adds random delays between actions to simulate human behavior
+5. **Smart Timing**: Calculates appropriate delays based on message length (1-5 seconds for text, 2-6 seconds for media)
+
+These methods return `null` if the number doesn't exist, preventing failed delivery attempts that could flag your account.
+
+**Delay Timings:**
+- Text messages: 1-5 seconds (calculated based on message length)
+- Images: 2-4 seconds
+- Videos: 3-6 seconds  
+- Files: 2-5 seconds
+- Voice, Location, Contacts, Buttons, Lists, Polls: 1.5-3 seconds
 
 ### Available Safe Send Methods
 
@@ -105,22 +117,35 @@ All safe send methods follow the same pattern: they check the number status firs
 - `safeSendList()` - Safe version of `sendList()`
 - `safeSendPoll()` - Safe version of `sendPoll()`
 
+### How Safe Send Works
+
+When you call a safe send method, the following sequence occurs automatically:
+
+1. **Verify Number**: Check if the recipient's number exists on WhatsApp
+2. **Send Seen**: Mark the chat as "seen" (if applicable)
+3. **Start Typing**: Show typing indicator in the chat
+4. **Wait**: Realistic delay based on message type (see "Delay Timings" above: 1-6 seconds depending on content)
+5. **Stop Typing**: Hide typing indicator
+6. **Send Message**: Deliver the actual message
+
+This mimics human behavior and significantly reduces the risk of being flagged as a bot or spam account.
+
 ### Safe Send Usage Examples
 
 ```typescript
-// Safe send text message
+// Safe send text message with anti-blocking measures
 const result = await client.safeSendText({
   chatId: '1234567890@c.us',
-  text: 'Hello!',
+  text: 'Hello! How are you?',
 });
 
 if (result === null) {
   console.log('Number does not exist on WhatsApp - message not sent');
 } else {
-  console.log('Message sent successfully:', result);
+  console.log('Message sent successfully with anti-blocking measures:', result);
 }
 
-// Safe send image
+// Safe send image with anti-blocking measures
 const imageResult = await client.safeSendImage({
   chatId: '1234567890@c.us',
   file: 'https://example.com/image.jpg',
@@ -133,7 +158,7 @@ if (imageResult === null) {
   console.log('Image sent successfully:', imageResult);
 }
 
-// Safe send file
+// Safe send file with anti-blocking measures
 const fileResult = await client.safeSendFile({
   chatId: '1234567890@c.us',
   file: 'https://example.com/document.pdf',
@@ -143,22 +168,48 @@ const fileResult = await client.safeSendFile({
 
 if (fileResult === null) {
   console.log('Number does not exist on WhatsApp - file not sent');
+} else {
+  console.log('File sent successfully:', fileResult);
 }
 ```
+
+### Anti-Blocking Best Practices
+
+Following WhatsApp's guidelines to avoid getting blocked:
+
+✅ **DO:**
+- Use safe send methods for new/unknown contacts
+- Add random delays between messages (the safe send methods do this automatically)
+- Only reply to messages, never initiate conversations with strangers
+- Send personalized messages that vary in content
+- Respect rate limits (maximum 4 messages per hour per contact is a safe guideline - exceeding this may trigger spam detection)
+- Have a profile picture and status
+- Use HTTPS URLs and avoid previously marked spam links
+
+❌ **DON'T:**
+- Send messages to numbers not on WhatsApp
+- Send bulk messages without delays
+- Use the same message template repeatedly
+- Send messages 24/7 without breaks
+- Send long texts or multiple messages to new contacts
+- Ignore user reports (if users block/report you, stop messaging them)
 
 ### When to Use Safe Send vs Regular Send
 
 - **Use Safe Send** when:
-  - Sending to numbers from external sources (databases, forms, etc.)
+  - Sending to numbers from external sources (databases, forms, APIs)
   - You're not sure if the number is on WhatsApp
-  - You want to prevent blocking
-  - You're doing bulk messaging
+  - You want maximum protection against blocking
+  - You're doing any form of bulk messaging
+  - Initiating conversations with new contacts
+  - Building a bot or automated system
 
 - **Use Regular Send** when:
-  - Sending to group chats
-  - Replying to received messages
-  - You're certain the number exists (e.g., from your contact list)
-  - Performance is critical and you've already verified the number
+  - Sending to group chats (groups don't need number verification)
+  - Replying to received messages (they initiated the conversation)
+  - You're certain the number exists and you have an ongoing conversation
+  - You need minimal latency and have already verified the number
+  - Sending to your own saved contacts from your phone
 
 ## API Methods
 
