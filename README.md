@@ -641,3 +641,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## Disclaimer
 
 This is an unofficial client library for WAHA API. It is not affiliated with or endorsed by the WAHA project.
+
+**USE AT YOUR OWN RISK**: This software is provided "as is" without warranty of any kind, either expressed or implied. The authors and contributors are not responsible for any damages, data loss, account bans, or other issues that may arise from using this library. You are solely responsible for ensuring your use complies with WhatsApp's Terms of Service and applicable laws. By using this library, you acknowledge and accept all risks associated with automated messaging and API usage.
