@@ -94,6 +94,13 @@ When you send messages to numbers that don't exist on WhatsApp, it can lead to y
 
 These methods return `null` if the number doesn't exist, preventing failed delivery attempts that could flag your account.
 
+**Delay Timings:**
+- Text messages: 1-5 seconds (calculated based on message length)
+- Images: 2-4 seconds
+- Videos: 3-6 seconds  
+- Files: 2-5 seconds
+- Voice, Location, Contacts, Buttons, Lists, Polls: 1.5-3 seconds
+
 ### Available Safe Send Methods
 
 All safe send methods follow the same pattern: they check the number status first, then send only if the number exists.
@@ -117,7 +124,7 @@ When you call a safe send method, the following sequence occurs automatically:
 1. **Verify Number**: Check if the recipient's number exists on WhatsApp
 2. **Send Seen**: Mark the chat as "seen" (if applicable)
 3. **Start Typing**: Show typing indicator in the chat
-4. **Wait**: Realistic delay based on message type (2-5 seconds)
+4. **Wait**: Realistic delay based on message type (1-6 seconds depending on content)
 5. **Stop Typing**: Hide typing indicator
 6. **Send Message**: Deliver the actual message
 
@@ -175,7 +182,7 @@ Following WhatsApp's guidelines to avoid getting blocked:
 - Add random delays between messages (the safe send methods do this automatically)
 - Only reply to messages, never initiate conversations with strangers
 - Send personalized messages that vary in content
-- Respect rate limits (4 messages per hour to contacts who replied)
+- Respect rate limits (approximately 4-5 messages per hour per contact as a safe guideline)
 - Have a profile picture and status
 - Use HTTPS URLs and avoid previously marked spam links
 
