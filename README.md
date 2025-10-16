@@ -124,7 +124,7 @@ When you call a safe send method, the following sequence occurs automatically:
 1. **Verify Number**: Check if the recipient's number exists on WhatsApp
 2. **Send Seen**: Mark the chat as "seen" (if applicable)
 3. **Start Typing**: Show typing indicator in the chat
-4. **Wait**: Realistic delay based on message type (1-6 seconds depending on content)
+4. **Wait**: Realistic delay based on message type (see timing details above)
 5. **Stop Typing**: Hide typing indicator
 6. **Send Message**: Deliver the actual message
 
@@ -182,7 +182,7 @@ Following WhatsApp's guidelines to avoid getting blocked:
 - Add random delays between messages (the safe send methods do this automatically)
 - Only reply to messages, never initiate conversations with strangers
 - Send personalized messages that vary in content
-- Respect rate limits (approximately 4-5 messages per hour per contact as a safe guideline)
+- Respect rate limits (maximum 4 messages per hour per contact is a safe guideline)
 - Have a profile picture and status
 - Use HTTPS URLs and avoid previously marked spam links
 
