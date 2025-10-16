@@ -602,13 +602,15 @@ npm install
 npx tsx src/demo.ts
 ```
 
-## Publishing to NPM
+## Publishing to NPM and Documentation
 
-This library is automatically published to NPM when a new release is created. The GitHub Actions workflow handles:
+This library is automatically published to NPM and its API documentation is deployed to GitHub Pages when a new release is created. The GitHub Actions workflows handle:
 
 1. Building the TypeScript code
 2. Running tests
 3. Publishing to NPM with provenance
+4. Generating API documentation with TypeDoc
+5. Deploying documentation to GitHub Pages
 
 ### Setup for NPM Publishing
 
@@ -623,12 +625,49 @@ To enable automatic publishing, you need to:
    - Create a new repository secret named `NPM_TOKEN`
    - Paste your NPM access token as the value
 
-3. Create a new release:
-   - Go to the repository's Releases page
-   - Click "Create a new release"
-   - Choose or create a tag (e.g., `v1.0.1`)
-   - Publish the release
-   - The GitHub Actions workflow will automatically publish to NPM
+### Setup for GitHub Pages
+
+To enable automatic documentation deployment:
+
+1. Go to repository Settings → Pages
+2. Under "Build and deployment", select "GitHub Actions" as the source
+3. Save the settings
+
+### Creating a Release
+
+When you're ready to publish a new version:
+
+1. Update the version in `package.json` (e.g., from `1.0.0` to `1.0.1`)
+2. Commit your changes
+3. Go to the repository's Releases page
+4. Click "Create a new release"
+5. Create a new tag matching the version (e.g., `v1.0.1`)
+6. Write release notes describing the changes
+7. Publish the release
+
+The GitHub Actions workflows will automatically:
+- Build and publish the package to NPM
+- Generate and deploy API documentation to GitHub Pages (available at `https://myusp.github.io/waha-api-client-ts/`)
+
+### Manual Documentation Deployment
+
+You can also manually trigger documentation deployment:
+
+1. Go to the Actions tab in the repository
+2. Select "Deploy Documentation to GitHub Pages" workflow
+3. Click "Run workflow"
+4. Select the branch and run
+
+### Viewing Documentation
+
+Once deployed, the API documentation will be available at:
+- **GitHub Pages**: https://myusp.github.io/waha-api-client-ts/
+
+You can also generate documentation locally:
+```bash
+npm run docs
+# Documentation will be generated in the ./docs directory
+```
 
 ## License
 
