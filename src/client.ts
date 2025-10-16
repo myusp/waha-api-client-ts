@@ -147,8 +147,31 @@ export class WAHAClient {
 
   /**
    * Send a text message
-   * @param params - Message parameters
-   * @returns API response
+   * 
+   * Sends a plain text message to a chat. For better anti-spam protection, consider using `safeSendText()` instead.
+   * 
+   * @param params - Message parameters including chatId, text, and optional reply_to
+   * @param params.chatId - Chat ID in format: phone@c.us (individual) or groupId@g.us (group)
+   * @param params.text - Text content of the message
+   * @param params.reply_to - Optional message ID to reply to
+   * @param params.config - Optional request configuration to override defaults
+   * @returns API response with message information
+   * 
+   * @example
+   * ```typescript
+   * // Send a simple text message
+   * const response = await client.sendText({
+   *   chatId: '1234567890@c.us',
+   *   text: 'Hello, World!',
+   * });
+   * 
+   * // Send a reply to a specific message
+   * const reply = await client.sendText({
+   *   chatId: '1234567890@c.us',
+   *   text: 'Thanks for your message!',
+   *   reply_to: 'message-id-here',
+   * });
+   * ```
    */
   async sendText(params: SendTextParams): Promise<APIResponse<MessageInfo>> {
     const { chatId, text, reply_to, config } = params;
@@ -168,8 +191,34 @@ export class WAHAClient {
 
   /**
    * Send an image message
-   * @param params - Message parameters
-   * @returns API response
+   * 
+   * Sends an image to a chat. The image can be provided as a URL or base64-encoded data.
+   * For better anti-spam protection, consider using `safeSendImage()` instead.
+   * 
+   * @param params - Message parameters including chatId, file, and optional caption
+   * @param params.chatId - Chat ID in format: phone@c.us (individual) or groupId@g.us (group)
+   * @param params.file - Image file as URL or base64 data
+   * @param params.caption - Optional caption for the image
+   * @param params.reply_to - Optional message ID to reply to
+   * @param params.config - Optional request configuration to override defaults
+   * @returns API response with message information
+   * 
+   * @example
+   * ```typescript
+   * // Send image from URL
+   * const response = await client.sendImage({
+   *   chatId: '1234567890@c.us',
+   *   file: 'https://example.com/image.jpg',
+   *   caption: 'Check out this image!',
+   * });
+   * 
+   * // Send image from base64
+   * const base64Response = await client.sendImage({
+   *   chatId: '1234567890@c.us',
+   *   file: 'data:image/jpeg;base64,/9j/4AAQSkZJRg...',
+   *   caption: 'Image from base64',
+   * });
+   * ```
    */
   async sendImage(params: SendImageParams): Promise<APIResponse<MessageInfo>> {
     const { chatId, file, caption, reply_to, config } = params;
@@ -190,8 +239,36 @@ export class WAHAClient {
 
   /**
    * Send a file message
-   * @param params - Message parameters
-   * @returns API response
+   * 
+   * Sends a file/document to a chat. The file can be provided as a URL or base64-encoded data.
+   * For better anti-spam protection, consider using `safeSendFile()` instead.
+   * 
+   * @param params - Message parameters including chatId, file, and optional filename/caption
+   * @param params.chatId - Chat ID in format: phone@c.us (individual) or groupId@g.us (group)
+   * @param params.file - File as URL or base64 data
+   * @param params.filename - Optional filename for the file
+   * @param params.caption - Optional caption for the file
+   * @param params.reply_to - Optional message ID to reply to
+   * @param params.config - Optional request configuration to override defaults
+   * @returns API response with message information
+   * 
+   * @example
+   * ```typescript
+   * // Send PDF file from URL
+   * const response = await client.sendFile({
+   *   chatId: '1234567890@c.us',
+   *   file: 'https://example.com/document.pdf',
+   *   filename: 'report.pdf',
+   *   caption: 'Monthly report',
+   * });
+   * 
+   * // Send file from base64
+   * const base64Response = await client.sendFile({
+   *   chatId: '1234567890@c.us',
+   *   file: 'data:application/pdf;base64,JVBERi0xLjcKC...',
+   *   filename: 'document.pdf',
+   * });
+   * ```
    */
   async sendFile(params: SendFileParams): Promise<APIResponse<MessageInfo>> {
     const { chatId, file, filename, caption, reply_to, config } = params;
@@ -213,8 +290,24 @@ export class WAHAClient {
 
   /**
    * Get session information
-   * @param config - Optional request configuration
-   * @returns Session information
+   * 
+   * Retrieves detailed information about a specific session including its status, configuration, and WhatsApp account details.
+   * 
+   * @param config - Optional request configuration to override defaults (including session name)
+   * @returns Session information including name, status, config, and me object
+   * 
+   * @example
+   * ```typescript
+   * // Get info for default session
+   * const session = await client.getSession();
+   * console.log('Session status:', session.status);
+   * console.log('My number:', session.me);
+   * 
+   * // Get info for a specific session
+   * const customSession = await client.getSession({
+   *   session: 'my-custom-session',
+   * });
+   * ```
    */
   async getSession(config?: RequestConfig): Promise<SessionInfo> {
     const mergedConfig = this.mergeConfig(config);
@@ -229,8 +322,25 @@ export class WAHAClient {
 
   /**
    * Start a session
-   * @param config - Optional request configuration
-   * @returns Session information
+   * 
+   * Starts a WhatsApp session. The session will begin the authentication process (QR code or pairing code).
+   * 
+   * @param config - Optional request configuration to override defaults (including session name)
+   * @returns Session information with updated status
+   * 
+   * @example
+   * ```typescript
+   * // Start default session
+   * const session = await client.startSession();
+   * 
+   * // Start a specific session
+   * const customSession = await client.startSession({
+   *   session: 'my-custom-session',
+   * });
+   * 
+   * // After starting, get QR code to authenticate
+   * const qr = await client.getQR();
+   * ```
    */
   async startSession(config?: RequestConfig): Promise<SessionInfo> {
     const mergedConfig = this.mergeConfig(config);
@@ -247,8 +357,22 @@ export class WAHAClient {
 
   /**
    * Stop a session
-   * @param config - Optional request configuration
-   * @returns API response
+   * 
+   * Stops a running WhatsApp session. This will disconnect the session but preserve its data for future use.
+   * 
+   * @param config - Optional request configuration to override defaults (including session name)
+   * @returns API response confirming the session was stopped
+   * 
+   * @example
+   * ```typescript
+   * // Stop default session
+   * await client.stopSession();
+   * 
+   * // Stop a specific session
+   * await client.stopSession({
+   *   session: 'my-custom-session',
+   * });
+   * ```
    */
   async stopSession(config?: RequestConfig): Promise<APIResponse> {
     const mergedConfig = this.mergeConfig(config);
@@ -265,8 +389,24 @@ export class WAHAClient {
 
   /**
    * Get all sessions
-   * @param config - Optional request configuration
-   * @returns List of sessions
+   * 
+   * Lists all WhatsApp sessions configured on the WAHA server, including their current status.
+   * 
+   * @param config - Optional request configuration to override defaults
+   * @returns Array of session information objects
+   * 
+   * @example
+   * ```typescript
+   * // Get all sessions
+   * const sessions = await client.getSessions();
+   * 
+   * sessions.forEach(session => {
+   *   console.log(`Session: ${session.name}, Status: ${session.status}`);
+   * });
+   * 
+   * // Filter for active sessions
+   * const activeSessions = sessions.filter(s => s.status === 'WORKING');
+   * ```
    */
   async getSessions(config?: RequestConfig): Promise<SessionInfo[]> {
     return this.request<SessionInfo[]>(
@@ -279,8 +419,23 @@ export class WAHAClient {
 
   /**
    * Get chats
-   * @param config - Optional request configuration
-   * @returns List of chats
+   * 
+   * Retrieves all chats (conversations) for the session, including individual chats and groups.
+   * 
+   * @param config - Optional request configuration to override defaults
+   * @returns Array of chat information objects
+   * 
+   * @example
+   * ```typescript
+   * // Get all chats
+   * const chats = await client.getChats();
+   * 
+   * // Filter for group chats
+   * const groups = chats.filter(chat => chat.isGroup);
+   * 
+   * // Filter for individual chats
+   * const individuals = chats.filter(chat => !chat.isGroup);
+   * ```
    */
   async getChats(config?: RequestConfig): Promise<ChatInfo[]> {
     const mergedConfig = this.mergeConfig(config);
@@ -295,9 +450,26 @@ export class WAHAClient {
 
   /**
    * Get messages from a chat
-   * @param chatId - Chat ID to get messages from
-   * @param config - Optional request configuration
-   * @returns List of messages
+   * 
+   * Retrieves message history from a specific chat conversation.
+   * 
+   * @param chatId - Chat ID in format: phone@c.us (individual) or groupId@g.us (group)
+   * @param config - Optional request configuration to override defaults
+   * @returns Array of message information objects
+   * 
+   * @example
+   * ```typescript
+   * // Get messages from a chat
+   * const messages = await client.getMessages('1234567890@c.us');
+   * 
+   * console.log(`Found ${messages.length} messages`);
+   * messages.forEach(msg => {
+   *   console.log(`${msg.from}: ${msg.body}`);
+   * });
+   * 
+   * // Get messages from a group
+   * const groupMessages = await client.getMessages('groupId@g.us');
+   * ```
    */
   async getMessages(chatId: string, config?: RequestConfig): Promise<MessageInfo[]> {
     const mergedConfig = this.mergeConfig(config);
@@ -312,9 +484,40 @@ export class WAHAClient {
 
   /**
    * Check if a number is registered on WhatsApp
-   * @param phone - Phone number to check
-   * @param config - Optional request configuration
-   * @returns Registration status
+   * 
+   * Verifies whether a phone number is registered on WhatsApp. This is essential for avoiding
+   * spam flags when sending messages to new contacts. Use this before sending messages to
+   * unknown numbers, or use the safe send methods which call this automatically.
+   * 
+   * @param phone - Phone number to check (with or without country code)
+   * @param config - Optional request configuration to override defaults
+   * @returns Object with exists or numberExists boolean indicating if the number is on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * // Check if a number exists on WhatsApp
+   * const status = await client.checkNumberStatus('1234567890');
+   * 
+   * if (status.exists || status.numberExists) {
+   *   console.log('Number is registered on WhatsApp');
+   *   await client.sendText({
+   *     chatId: '1234567890@c.us',
+   *     text: 'Hello!',
+   *   });
+   * } else {
+   *   console.log('Number is NOT on WhatsApp');
+   * }
+   * 
+   * // Or use safe send methods which check automatically
+   * const result = await client.safeSendText({
+   *   chatId: '1234567890@c.us',
+   *   text: 'Hello!',
+   * });
+   * 
+   * if (result === null) {
+   *   console.log('Number not found - message not sent');
+   * }
+   * ```
    */
   async checkNumberStatus(
     phone: string,
@@ -1027,6 +1230,21 @@ export class WAHAClient {
 
   /**
    * Get QR code for pairing WhatsApp API
+   * 
+   * Retrieves the QR code that can be scanned with WhatsApp mobile app to authenticate the session.
+   * 
+   * @param format - Format of the QR code: 'image' returns a PNG image, 'raw' returns the raw QR code data
+   * @param config - Optional request configuration to override defaults
+   * @returns QR code in the specified format
+   * 
+   * @example
+   * ```typescript
+   * // Get QR code as image
+   * const qrImage = await client.getQR('image');
+   * 
+   * // Get raw QR code data
+   * const qrData = await client.getQR('raw');
+   * ```
    */
   async getQR(format: 'image' | 'raw' = 'image', config?: RequestConfig): Promise<any> {
     const mergedConfig = this.mergeConfig(config);
@@ -1041,6 +1259,27 @@ export class WAHAClient {
 
   /**
    * Request authentication code
+   * 
+   * Requests an authentication code to be sent via SMS or voice call for phone number-based authentication.
+   * 
+   * @param data - Object containing phoneNumber and optional method ('sms' or 'voice')
+   * @param config - Optional request configuration to override defaults
+   * @returns Response indicating the code was sent
+   * 
+   * @example
+   * ```typescript
+   * // Request code via SMS
+   * await client.requestCode({
+   *   phoneNumber: '+1234567890',
+   *   method: 'sms',
+   * });
+   * 
+   * // Request code via voice call
+   * await client.requestCode({
+   *   phoneNumber: '+1234567890',
+   *   method: 'voice',
+   * });
+   * ```
    */
   async requestCode(data: { phoneNumber: string; method?: string }, config?: RequestConfig): Promise<any> {
     const mergedConfig = this.mergeConfig(config);
@@ -1056,6 +1295,26 @@ export class WAHAClient {
 
   /**
    * Create a new session
+   * 
+   * Creates a new WhatsApp session with the specified configuration. The session can be started
+   * immediately or configured for later use.
+   * 
+   * @param data - Session configuration data including name and optional settings
+   * @param config - Optional request configuration to override defaults
+   * @returns Created session information
+   * 
+   * @example
+   * ```typescript
+   * // Create a new session
+   * const session = await client.createSession({
+   *   name: 'my-new-session',
+   *   config: {
+   *     // Session-specific configuration
+   *   },
+   * });
+   * 
+   * console.log('Session created:', session.name);
+   * ```
    */
   async createSession(data: any, config?: RequestConfig): Promise<SessionInfo> {
     return this.request<SessionInfo>('POST', '/api/sessions', data, config);
@@ -1063,6 +1322,25 @@ export class WAHAClient {
 
   /**
    * Update session configuration
+   * 
+   * Updates the configuration of an existing session. The session must be stopped before updating.
+   * 
+   * @param data - Updated session configuration data
+   * @param config - Optional request configuration to override defaults (including session name)
+   * @returns Updated session information
+   * 
+   * @example
+   * ```typescript
+   * // Update session configuration
+   * const updated = await client.updateSession({
+   *   webhooks: [
+   *     {
+   *       url: 'https://example.com/webhook',
+   *       events: ['message'],
+   *     },
+   *   ],
+   * });
+   * ```
    */
   async updateSession(data: any, config?: RequestConfig): Promise<SessionInfo> {
     const mergedConfig = this.mergeConfig(config);
@@ -1076,6 +1354,22 @@ export class WAHAClient {
 
   /**
    * Delete a session
+   * 
+   * Permanently deletes a session and all its data. This action cannot be undone.
+   * 
+   * @param config - Optional request configuration to override defaults (including session name)
+   * @returns API response confirming deletion
+   * 
+   * @example
+   * ```typescript
+   * // Delete default session
+   * await client.deleteSession();
+   * 
+   * // Delete a specific session
+   * await client.deleteSession({
+   *   session: 'session-to-delete',
+   * });
+   * ```
    */
   async deleteSession(config?: RequestConfig): Promise<any> {
     const mergedConfig = this.mergeConfig(config);
@@ -1084,6 +1378,20 @@ export class WAHAClient {
 
   /**
    * Get session "me" info
+   * 
+   * Retrieves information about the authenticated WhatsApp account for this session,
+   * including phone number, profile name, and other account details.
+   * 
+   * @param config - Optional request configuration to override defaults (including session name)
+   * @returns Account information for the authenticated session
+   * 
+   * @example
+   * ```typescript
+   * // Get my account info
+   * const me = await client.getSessionMe();
+   * console.log('My number:', me.id);
+   * console.log('My name:', me.pushname);
+   * ```
    */
   async getSessionMe(config?: RequestConfig): Promise<any> {
     const mergedConfig = this.mergeConfig(config);
@@ -1272,6 +1580,29 @@ export class WAHAClient {
 
   /**
    * Mark message as seen
+   * 
+   * Sends a "seen" receipt for a message or chat. This helps your bot appear more human-like
+   * and is recommended by WhatsApp's anti-blocking guidelines. The safe send methods call this automatically.
+   * 
+   * @param data - Object containing chatId and optional messageId
+   * @param data.chatId - Chat ID in format: phone@c.us (individual) or groupId@g.us (group)
+   * @param data.messageId - Optional specific message ID to mark as seen
+   * @param config - Optional request configuration to override defaults
+   * @returns API response
+   * 
+   * @example
+   * ```typescript
+   * // Mark all messages in a chat as seen
+   * await client.sendSeen({
+   *   chatId: '1234567890@c.us',
+   * });
+   * 
+   * // Mark a specific message as seen
+   * await client.sendSeen({
+   *   chatId: '1234567890@c.us',
+   *   messageId: 'message-id-here',
+   * });
+   * ```
    */
   async sendSeen(data: { chatId: string; messageId?: string }, config?: RequestConfig): Promise<any> {
     return this.request<any>('POST', '/api/sendSeen', data, config);
@@ -1279,6 +1610,31 @@ export class WAHAClient {
 
   /**
    * Start typing indicator
+   * 
+   * Shows the "typing..." indicator in a chat. This helps your bot appear more human-like
+   * and is recommended by WhatsApp's anti-blocking guidelines. Remember to call stopTyping()
+   * after a realistic delay. The safe send methods handle this automatically.
+   * 
+   * @param data - Object containing chatId
+   * @param data.chatId - Chat ID in format: phone@c.us (individual) or groupId@g.us (group)
+   * @param config - Optional request configuration to override defaults
+   * @returns API response
+   * 
+   * @example
+   * ```typescript
+   * // Show typing indicator
+   * await client.startTyping({ chatId: '1234567890@c.us' });
+   * 
+   * // Wait for realistic typing time
+   * await new Promise(resolve => setTimeout(resolve, 2000));
+   * 
+   * // Stop typing and send message
+   * await client.stopTyping({ chatId: '1234567890@c.us' });
+   * await client.sendText({
+   *   chatId: '1234567890@c.us',
+   *   text: 'Hello!',
+   * });
+   * ```
    */
   async startTyping(data: { chatId: string }, config?: RequestConfig): Promise<any> {
     return this.request<any>('POST', '/api/startTyping', data, config);
@@ -1286,6 +1642,32 @@ export class WAHAClient {
 
   /**
    * Stop typing indicator
+   * 
+   * Stops the "typing..." indicator in a chat. Should be called after startTyping()
+   * and before sending the actual message. The safe send methods handle this automatically.
+   * 
+   * @param data - Object containing chatId
+   * @param data.chatId - Chat ID in format: phone@c.us (individual) or groupId@g.us (group)
+   * @param config - Optional request configuration to override defaults
+   * @returns API response
+   * 
+   * @example
+   * ```typescript
+   * // Start typing
+   * await client.startTyping({ chatId: '1234567890@c.us' });
+   * 
+   * // Wait for realistic typing time
+   * await new Promise(resolve => setTimeout(resolve, 2000));
+   * 
+   * // Stop typing
+   * await client.stopTyping({ chatId: '1234567890@c.us' });
+   * 
+   * // Send the message
+   * await client.sendText({
+   *   chatId: '1234567890@c.us',
+   *   text: 'Hello!',
+   * });
+   * ```
    */
   async stopTyping(data: { chatId: string }, config?: RequestConfig): Promise<any> {
     return this.request<any>('POST', '/api/stopTyping', data, config);
@@ -1855,6 +2237,29 @@ export class WAHAClient {
 
   /**
    * Create group
+   * 
+   * Creates a new WhatsApp group with the specified name and participants.
+   * 
+   * @param data - Group data including name and participants array
+   * @param data.name - Name of the group
+   * @param data.participants - Array of participant phone numbers in format: phone@c.us
+   * @param config - Optional request configuration to override defaults
+   * @returns Created group information
+   * 
+   * @example
+   * ```typescript
+   * // Create a new group
+   * const group = await client.createGroup({
+   *   name: 'My Group',
+   *   participants: [
+   *     '1234567890@c.us',
+   *     '0987654321@c.us',
+   *   ],
+   * });
+   * 
+   * console.log('Group created:', group.id);
+   * console.log('Group name:', group.subject);
+   * ```
    */
   async createGroup(data: any, config?: RequestConfig): Promise<any> {
     const mergedConfig = this.mergeConfig(config);
@@ -1863,6 +2268,22 @@ export class WAHAClient {
 
   /**
    * Get all groups
+   * 
+   * Retrieves all groups that the authenticated account is a member of.
+   * 
+   * @param config - Optional request configuration to override defaults
+   * @returns Array of group information objects
+   * 
+   * @example
+   * ```typescript
+   * // Get all groups
+   * const groups = await client.getGroups();
+   * 
+   * groups.forEach(group => {
+   *   console.log(`Group: ${group.subject} (${group.id})`);
+   *   console.log(`Participants: ${group.participants.length}`);
+   * });
+   * ```
    */
   async getGroups(config?: RequestConfig): Promise<any> {
     const mergedConfig = this.mergeConfig(config);
