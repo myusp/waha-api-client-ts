@@ -344,9 +344,57 @@ export class WAHAClient {
   // ==================== 🛡️ Safe Send Methods (Auto-check number status) ====================
 
   /**
-   * Safely send a text message - checks if number exists before sending
-   * @param params - Message parameters
-   * @returns API response or null if number doesn't exist
+   * Helper to calculate typing delay based on message length
+   * Returns a delay in milliseconds that simulates human typing speed
+   * @param textLength - Length of the text message
+   * @returns Random delay between 1-3 seconds for short messages, up to 5 seconds for longer ones
+   */
+  private calculateTypingDelay(textLength: number): number {
+    // Base delay: 1-3 seconds
+    const baseDelay = 1000 + Math.random() * 2000;
+    // Add extra time for longer messages (roughly 50-100ms per character, capped)
+    const extraDelay = Math.min(textLength * (50 + Math.random() * 50), 2000);
+    return Math.floor(baseDelay + extraDelay);
+  }
+
+  /**
+   * Helper to add random delay to simulate human behavior
+   * @param minMs - Minimum delay in milliseconds
+   * @param maxMs - Maximum delay in milliseconds
+   * @returns Promise that resolves after the delay
+   */
+  private async randomDelay(minMs: number, maxMs: number): Promise<void> {
+    const delay = minMs + Math.random() * (maxMs - minMs);
+    await new Promise(resolve => setTimeout(resolve, Math.floor(delay)));
+  }
+
+  /**
+   * Safely send a text message with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines:
+   * 1. Checks if the number exists on WhatsApp before sending
+   * 2. Sends "seen" indicator to appear more human-like
+   * 3. Shows typing indicator with realistic delay based on message length
+   * 4. Sends the actual message
+   * 
+   * Following these steps helps avoid being flagged as spam by WhatsApp.
+   * 
+   * @param params - Message parameters including chatId and text
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendText({
+   *   chatId: '1234567890@c.us',
+   *   text: 'Hello! How are you?',
+   * });
+   * 
+   * if (result === null) {
+   *   console.log('Number does not exist on WhatsApp');
+   * } else {
+   *   console.log('Message sent:', result);
+   * }
+   * ```
    */
   async safeSendText(params: SendTextParams): Promise<APIResponse<MessageInfo> | null> {
     const phone = this.extractPhoneFromChatId(params.chatId);
@@ -356,13 +404,67 @@ export class WAHAClient {
       return null;
     }
     
+    // Step 1: Send "seen" to appear more natural
+    try {
+      await this.sendSeen({ chatId: params.chatId }, params.config);
+    } catch (error) {
+      // Ignore errors in sendSeen, it's optional for the main flow
+    }
+    
+    // Small delay after seen
+    await this.randomDelay(500, 1000);
+    
+    // Step 2: Start typing
+    try {
+      await this.startTyping({ chatId: params.chatId }, params.config);
+    } catch (error) {
+      // Ignore errors in startTyping
+    }
+    
+    // Step 3: Wait based on message length (simulate human typing)
+    const typingDelay = this.calculateTypingDelay(params.text.length);
+    await new Promise(resolve => setTimeout(resolve, typingDelay));
+    
+    // Step 4: Stop typing
+    try {
+      await this.stopTyping({ chatId: params.chatId }, params.config);
+    } catch (error) {
+      // Ignore errors in stopTyping
+    }
+    
+    // Small delay before sending
+    await this.randomDelay(200, 500);
+    
+    // Step 5: Send the actual message
     return this.sendText(params);
   }
 
   /**
-   * Safely send an image message - checks if number exists before sending
-   * @param params - Message parameters
-   * @returns API response or null if number doesn't exist
+   * Safely send an image message with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines:
+   * 1. Checks if the number exists on WhatsApp before sending
+   * 2. Sends "seen" indicator to appear more human-like
+   * 3. Shows typing indicator with realistic delay
+   * 4. Sends the actual image
+   * 
+   * @param params - Message parameters including chatId, file, and optional caption
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendImage({
+   *   chatId: '1234567890@c.us',
+   *   file: 'https://example.com/image.jpg',
+   *   caption: 'Check this out!',
+   * });
+   * 
+   * if (result === null) {
+   *   console.log('Number does not exist on WhatsApp');
+   * } else {
+   *   console.log('Image sent:', result);
+   * }
+   * ```
    */
   async safeSendImage(params: SendImageParams): Promise<APIResponse<MessageInfo> | null> {
     const phone = this.extractPhoneFromChatId(params.chatId);
@@ -372,13 +474,65 @@ export class WAHAClient {
       return null;
     }
     
+    // Step 1: Send "seen" to appear more natural
+    try {
+      await this.sendSeen({ chatId: params.chatId }, params.config);
+    } catch (error) {
+      // Ignore errors in sendSeen
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    // Step 2: Start typing
+    try {
+      await this.startTyping({ chatId: params.chatId }, params.config);
+    } catch (error) {
+      // Ignore errors in startTyping
+    }
+    
+    // Step 3: Wait to simulate human behavior (images take time to select/upload)
+    await this.randomDelay(2000, 4000);
+    
+    // Step 4: Stop typing
+    try {
+      await this.stopTyping({ chatId: params.chatId }, params.config);
+    } catch (error) {
+      // Ignore errors in stopTyping
+    }
+    
+    await this.randomDelay(200, 500);
+    
+    // Step 5: Send the image
     return this.sendImage(params);
   }
 
   /**
-   * Safely send a file message - checks if number exists before sending
-   * @param params - Message parameters
-   * @returns API response or null if number doesn't exist
+   * Safely send a file message with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines:
+   * 1. Checks if the number exists on WhatsApp before sending
+   * 2. Sends "seen" indicator to appear more human-like
+   * 3. Shows typing indicator with realistic delay
+   * 4. Sends the actual file
+   * 
+   * @param params - Message parameters including chatId, file, optional filename and caption
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendFile({
+   *   chatId: '1234567890@c.us',
+   *   file: 'https://example.com/document.pdf',
+   *   filename: 'report.pdf',
+   *   caption: 'Here is the report',
+   * });
+   * 
+   * if (result === null) {
+   *   console.log('Number does not exist on WhatsApp');
+   * } else {
+   *   console.log('File sent:', result);
+   * }
+   * ```
    */
   async safeSendFile(params: SendFileParams): Promise<APIResponse<MessageInfo> | null> {
     const phone = this.extractPhoneFromChatId(params.chatId);
@@ -388,14 +542,62 @@ export class WAHAClient {
       return null;
     }
     
+    // Step 1: Send "seen" to appear more natural
+    try {
+      await this.sendSeen({ chatId: params.chatId }, params.config);
+    } catch (error) {
+      // Ignore errors in sendSeen
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    // Step 2: Start typing
+    try {
+      await this.startTyping({ chatId: params.chatId }, params.config);
+    } catch (error) {
+      // Ignore errors in startTyping
+    }
+    
+    // Step 3: Wait to simulate human behavior (files take time to select/upload)
+    await this.randomDelay(2000, 5000);
+    
+    // Step 4: Stop typing
+    try {
+      await this.stopTyping({ chatId: params.chatId }, params.config);
+    } catch (error) {
+      // Ignore errors in stopTyping
+    }
+    
+    await this.randomDelay(200, 500);
+    
+    // Step 5: Send the file
     return this.sendFile(params);
   }
 
   /**
-   * Safely send a voice message - checks if number exists before sending
-   * @param data - Message data including chatId
+   * Safely send a voice message with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines:
+   * 1. Checks if the number exists on WhatsApp before sending
+   * 2. Sends "seen" indicator to appear more human-like
+   * 3. Shows typing indicator with realistic delay
+   * 4. Sends the actual voice message
+   * 
+   * @param data - Message data including chatId and voice file
    * @param config - Optional request configuration
-   * @returns API response or null if number doesn't exist
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendVoice({
+   *   chatId: '1234567890@c.us',
+   *   file: 'https://example.com/voice.ogg',
+   * });
+   * 
+   * if (result === null) {
+   *   console.log('Number does not exist on WhatsApp');
+   * }
+   * ```
    */
   async safeSendVoice(data: any, config?: RequestConfig): Promise<any | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
@@ -405,14 +607,51 @@ export class WAHAClient {
       return null;
     }
     
+    try {
+      await this.sendSeen({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    try {
+      await this.startTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(2000, 4000);
+    
+    try {
+      await this.stopTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(200, 500);
+    
     return this.sendVoice(data, config);
   }
 
   /**
-   * Safely send a video message - checks if number exists before sending
-   * @param data - Message data including chatId
+   * Safely send a video message with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines by checking
+   * if the number exists and using typing indicators before sending.
+   * 
+   * @param data - Message data including chatId and video file
    * @param config - Optional request configuration
-   * @returns API response or null if number doesn't exist
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendVideo({
+   *   chatId: '1234567890@c.us',
+   *   file: 'https://example.com/video.mp4',
+   *   caption: 'Check out this video',
+   * });
+   * ```
    */
   async safeSendVideo(data: any, config?: RequestConfig): Promise<any | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
@@ -422,14 +661,52 @@ export class WAHAClient {
       return null;
     }
     
+    try {
+      await this.sendSeen({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    try {
+      await this.startTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(3000, 6000);
+    
+    try {
+      await this.stopTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(200, 500);
+    
     return this.sendVideo(data, config);
   }
 
   /**
-   * Safely send a location message - checks if number exists before sending
-   * @param data - Message data including chatId
+   * Safely send a location message with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines by checking
+   * if the number exists and using typing indicators before sending.
+   * 
+   * @param data - Message data including chatId, latitude, and longitude
    * @param config - Optional request configuration
-   * @returns API response or null if number doesn't exist
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendLocation({
+   *   chatId: '1234567890@c.us',
+   *   latitude: 37.7749,
+   *   longitude: -122.4194,
+   *   title: 'San Francisco',
+   * });
+   * ```
    */
   async safeSendLocation(data: any, config?: RequestConfig): Promise<any | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
@@ -439,14 +716,51 @@ export class WAHAClient {
       return null;
     }
     
+    try {
+      await this.sendSeen({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    try {
+      await this.startTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(1500, 3000);
+    
+    try {
+      await this.stopTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(200, 500);
+    
     return this.sendLocation(data, config);
   }
 
   /**
-   * Safely send a contact vCard - checks if number exists before sending
-   * @param data - Message data including chatId
+   * Safely send a contact vCard with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines by checking
+   * if the number exists and using typing indicators before sending.
+   * 
+   * @param data - Message data including chatId and contact information
    * @param config - Optional request configuration
-   * @returns API response or null if number doesn't exist
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendContactVcard({
+   *   chatId: '1234567890@c.us',
+   *   contactId: '0987654321@c.us',
+   *   name: 'John Doe',
+   * });
+   * ```
    */
   async safeSendContactVcard(data: any, config?: RequestConfig): Promise<any | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
@@ -456,14 +770,51 @@ export class WAHAClient {
       return null;
     }
     
+    try {
+      await this.sendSeen({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    try {
+      await this.startTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(1500, 3000);
+    
+    try {
+      await this.stopTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(200, 500);
+    
     return this.sendContactVcard(data, config);
   }
 
   /**
-   * Safely send a link preview - checks if number exists before sending
-   * @param data - Message data including chatId
+   * Safely send a link preview with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines by checking
+   * if the number exists and using typing indicators before sending.
+   * 
+   * @param data - Message data including chatId and URL
    * @param config - Optional request configuration
-   * @returns API response or null if number doesn't exist
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendLinkPreview({
+   *   chatId: '1234567890@c.us',
+   *   url: 'https://example.com',
+   *   title: 'Example Website',
+   * });
+   * ```
    */
   async safeSendLinkPreview(data: any, config?: RequestConfig): Promise<any | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
@@ -473,14 +824,54 @@ export class WAHAClient {
       return null;
     }
     
+    try {
+      await this.sendSeen({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    try {
+      await this.startTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(1500, 3000);
+    
+    try {
+      await this.stopTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(200, 500);
+    
     return this.sendLinkPreview(data, config);
   }
 
   /**
-   * Safely send buttons - checks if number exists before sending
-   * @param data - Message data including chatId
+   * Safely send buttons with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines by checking
+   * if the number exists and using typing indicators before sending.
+   * 
+   * @param data - Message data including chatId, text, and buttons
    * @param config - Optional request configuration
-   * @returns API response or null if number doesn't exist
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendButtons({
+   *   chatId: '1234567890@c.us',
+   *   text: 'Choose an option',
+   *   buttons: [
+   *     { id: '1', text: 'Option 1' },
+   *     { id: '2', text: 'Option 2' },
+   *   ],
+   * });
+   * ```
    */
   async safeSendButtons(data: any, config?: RequestConfig): Promise<any | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
@@ -490,14 +881,58 @@ export class WAHAClient {
       return null;
     }
     
+    try {
+      await this.sendSeen({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    try {
+      await this.startTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(1500, 3000);
+    
+    try {
+      await this.stopTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(200, 500);
+    
     return this.sendButtons(data, config);
   }
 
   /**
-   * Safely send a list message - checks if number exists before sending
-   * @param data - Message data including chatId
+   * Safely send a list message with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines by checking
+   * if the number exists and using typing indicators before sending.
+   * 
+   * @param data - Message data including chatId, title, and list sections
    * @param config - Optional request configuration
-   * @returns API response or null if number doesn't exist
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendList({
+   *   chatId: '1234567890@c.us',
+   *   title: 'Menu',
+   *   sections: [
+   *     {
+   *       title: 'Main Dishes',
+   *       rows: [
+   *         { id: '1', title: 'Pizza', description: 'Delicious pizza' },
+   *       ],
+   *     },
+   *   ],
+   * });
+   * ```
    */
   async safeSendList(data: any, config?: RequestConfig): Promise<any | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
@@ -507,14 +942,51 @@ export class WAHAClient {
       return null;
     }
     
+    try {
+      await this.sendSeen({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    try {
+      await this.startTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(2000, 4000);
+    
+    try {
+      await this.stopTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(200, 500);
+    
     return this.sendList(data, config);
   }
 
   /**
-   * Safely send a poll - checks if number exists before sending
-   * @param data - Message data including chatId
+   * Safely send a poll with anti-blocking measures
+   * 
+   * This method implements WhatsApp's recommended anti-blocking guidelines by checking
+   * if the number exists and using typing indicators before sending.
+   * 
+   * @param data - Message data including chatId, poll name, and options
    * @param config - Optional request configuration
-   * @returns API response or null if number doesn't exist
+   * @returns API response with message info, or null if number doesn't exist on WhatsApp
+   * 
+   * @example
+   * ```typescript
+   * const result = await client.safeSendPoll({
+   *   chatId: '1234567890@c.us',
+   *   name: 'What's your favorite color?',
+   *   options: ['Red', 'Blue', 'Green'],
+   * });
+   * ```
    */
   async safeSendPoll(data: any, config?: RequestConfig): Promise<any | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
@@ -523,6 +995,30 @@ export class WAHAClient {
     if (!statusResult.exists && !statusResult.numberExists) {
       return null;
     }
+    
+    try {
+      await this.sendSeen({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(500, 1000);
+    
+    try {
+      await this.startTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(2000, 4000);
+    
+    try {
+      await this.stopTyping({ chatId: data.chatId }, config);
+    } catch (error) {
+      // Ignore errors
+    }
+    
+    await this.randomDelay(200, 500);
     
     return this.sendPoll(data, config);
   }
