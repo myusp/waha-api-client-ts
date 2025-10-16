@@ -4,6 +4,9 @@ TypeScript client library for [WAHA (WhatsApp HTTP API)](https://github.com/devl
 
 ## Features
 
+- ✅ **Complete API Coverage**: All 147 WAHA API endpoints implemented
+- 🌐 **Universal Compatibility**: Works in both Node.js and browser environments
+- 🚫 **Zero Dependencies**: No axios or other HTTP libraries - uses native fetch API
 - 🔑 **Default Configuration**: Set API key, base URL, and default session on initialization
 - 🔄 **Config Override**: Override session, timeout, retry attempts, and retry delay per API call
 - 🔁 **Automatic Retries**: Built-in retry logic with configurable attempts and delays
@@ -74,9 +77,185 @@ await client.sendText({
 
 ## API Methods
 
-### Messaging
+This client implements all 147 WAHA API endpoints organized into the following categories:
 
-#### Send Text Message
+### 🔑 Authentication (2 methods)
+- `getQR()` - Get QR code for pairing
+- `requestCode()` - Request authentication code
+
+### 🖥️ Session Management (13 methods)
+- `getSessions()` - Get all sessions
+- `getSession()` - Get session info
+- `createSession()` - Create new session
+- `updateSession()` - Update session config
+- `deleteSession()` - Delete session
+- `startSession()` / `startSessionAlt()` - Start session
+- `stopSession()` / `stopSessionAlt()` - Stop session
+- `logoutSession()` / `logoutSessionBulk()` - Logout session
+- `restartSession()` - Restart session
+- `getSessionMe()` - Get session "me" info
+
+### 🆔 Profile Management (5 methods)
+- `getProfile()` - Get my profile
+- `setProfileName()` - Set profile name
+- `setProfileStatus()` - Set profile status
+- `setProfilePicture()` - Set profile picture
+- `deleteProfilePicture()` - Delete profile picture
+
+### 📤 Messaging (24 methods)
+- `sendText()` / `sendTextAlt()` / `sendTextGet()` - Send text message
+- `sendImage()` / `sendImageAlt()` - Send image
+- `sendFile()` / `sendFileAlt()` - Send file
+- `sendVoice()` - Send voice message
+- `sendVideo()` - Send video
+- `sendButtons()` - Send buttons
+- `sendList()` - Send list message
+- `sendPoll()` - Send poll
+- `sendPollVote()` - Vote in poll
+- `sendLocation()` - Send location
+- `sendContactVcard()` - Send contact vCard
+- `sendLinkPreview()` - Send link with preview
+- `sendLinkCustomPreview()` - Send link with custom preview
+- `forwardMessage()` - Forward message
+- `reply()` - Reply to message
+- `replyButton()` - Reply to button
+- `sendSeen()` - Mark as seen
+- `startTyping()` - Start typing indicator
+- `stopTyping()` - Stop typing indicator
+- `reaction()` - React to message
+- `star()` - Star/unstar message
+- `getMessages()` / `getMessagesAlt()` - Get messages
+- `checkNumberStatus()` - Check if number is on WhatsApp
+
+### 💬 Chat Management (16 methods)
+- `getChats()` - Get all chats
+- `getChatsOverview()` - Get chats overview
+- `createChatsOverview()` - Create chats overview
+- `deleteChat()` - Delete chat
+- `getChatPicture()` - Get chat picture
+- `getMessage()` - Get specific message
+- `deleteMessage()` - Delete message
+- `editMessage()` - Edit message
+- `deleteAllMessages()` - Delete all messages
+- `readMessages()` - Mark messages as read
+- `pinMessage()` - Pin message
+- `unpinMessage()` - Unpin message
+- `archiveChat()` - Archive chat
+- `unarchiveChat()` - Unarchive chat
+- `markChatUnread()` - Mark chat as unread
+
+### 📢 Channels Management (14 methods)
+- `getChannels()` - Get all channels
+- `createChannel()` - Create channel
+- `getChannel()` - Get channel by ID
+- `deleteChannel()` - Delete channel
+- `getChannelMessagesPreview()` - Get messages preview
+- `followChannel()` - Follow channel
+- `unfollowChannel()` - Unfollow channel
+- `muteChannel()` - Mute channel
+- `unmuteChannel()` - Unmute channel
+- `searchChannelsByView()` - Search channels by view
+- `searchChannelsByText()` - Search channels by text
+- `getChannelSearchViews()` - Get search views
+- `getChannelSearchCountries()` - Get search countries
+- `getChannelSearchCategories()` - Get search categories
+
+### 🟢 Status Management (6 methods)
+- `postTextStatus()` - Post text status
+- `postImageStatus()` - Post image status
+- `postVoiceStatus()` - Post voice status
+- `postVideoStatus()` - Post video status
+- `deleteStatus()` - Delete status
+- `getNewMessageId()` - Get new message ID
+
+### 🏷️ Labels Management (7 methods)
+- `getLabels()` - Get all labels
+- `createLabel()` - Create label
+- `updateLabel()` - Update label
+- `deleteLabel()` - Delete label
+- `getChatLabels()` - Get labels for chat
+- `setChatLabels()` - Set labels for chat
+- `getChatsByLabel()` - Get chats by label
+
+### 👤 Contacts Management (12 methods)
+- `getAllContacts()` - Get all contacts
+- `getContact()` - Get contact info
+- `checkContactExists()` - Check if contact exists
+- `getContactAbout()` - Get contact about
+- `getContactProfilePicture()` - Get contact profile picture
+- `blockContact()` - Block contact
+- `unblockContact()` - Unblock contact
+- `updateContact()` - Update contact
+- `getLids()` - Get LIDs
+- `getLidsCount()` - Get LIDs count
+- `getLid()` - Get LID by ID
+- `getLidByPhone()` - Get LID by phone
+
+### 👥 Groups Management (25 methods)
+- `createGroup()` - Create group
+- `getGroups()` - Get all groups
+- `getGroup()` - Get group by ID
+- `deleteGroup()` - Delete group
+- `getGroupsCount()` - Get groups count
+- `refreshGroups()` - Refresh groups
+- `getGroupJoinInfo()` - Get group join info
+- `joinGroup()` - Join group
+- `leaveGroup()` - Leave group
+- `getGroupPicture()` - Get group picture
+- `setGroupPicture()` - Set group picture
+- `deleteGroupPicture()` - Delete group picture
+- `setGroupDescription()` - Set group description
+- `setGroupSubject()` - Set group subject
+- `getGroupInfoAdminOnly()` - Get info admin only setting
+- `setGroupInfoAdminOnly()` - Set info admin only
+- `getGroupMessagesAdminOnly()` - Get messages admin only setting
+- `setGroupMessagesAdminOnly()` - Set messages admin only
+- `getGroupInviteCode()` - Get invite code
+- `revokeGroupInviteCode()` - Revoke invite code
+- `getGroupParticipants()` - Get participants
+- `addGroupParticipants()` - Add participants
+- `removeGroupParticipants()` - Remove participants
+- `promoteGroupParticipant()` - Promote to admin
+- `demoteGroupParticipant()` - Demote from admin
+
+### ✅ Presence Management (4 methods)
+- `setPresence()` - Set presence
+- `getAllPresence()` - Get all presence info
+- `getPresence()` - Get presence for chat
+- `subscribePresence()` - Subscribe to presence
+
+### 🔍 Observability (9 methods)
+- `ping()` - Ping endpoint
+- `health()` - Health check
+- `getVersion()` - Get API version
+- `getServerVersion()` - Get server version
+- `getServerEnvironment()` - Get server environment
+- `getServerStatus()` - Get server status
+- `stopServer()` - Stop server
+- `getHeapSnapshot()` - Get heap snapshot
+- `getBrowserTrace()` - Get browser trace
+
+### 🖼️ Media Management (2 methods)
+- `convertToVoice()` - Convert audio to voice format
+- `convertVideo()` - Convert video
+
+### 🖼️ Screenshot (1 method)
+- `takeScreenshot()` - Take screenshot
+
+### 📅 Events (1 method)
+- `sendEvent()` - Send event
+
+### 🧩 Apps Management (6 methods)
+- `getApps()` - Get all apps
+- `createApp()` - Create app
+- `getApp()` - Get app by ID
+- `updateApp()` - Update app
+- `deleteApp()` - Delete app
+- `getChatwootLocales()` - Get Chatwoot locales
+
+## Usage Examples
+
+### Send Text Message
 
 ```typescript
 await client.sendText({
@@ -87,7 +266,7 @@ await client.sendText({
 });
 ```
 
-#### Send Image
+### Send Image
 
 ```typescript
 await client.sendImage({
@@ -99,7 +278,7 @@ await client.sendImage({
 });
 ```
 
-#### Send File
+### Send File
 
 ```typescript
 await client.sendFile({
@@ -109,6 +288,27 @@ await client.sendFile({
   caption: 'Important document',          // Optional
   reply_to: 'message-id',                 // Optional
   config: { ... },                        // Optional
+});
+```
+
+### Create and Manage Groups
+
+```typescript
+// Create a group
+const groupResponse = await client.createGroup({
+  name: 'My Group',
+  participants: ['1234567890@c.us', '0987654321@c.us']
+});
+
+// Add participants (use the group ID from the response)
+const groupId = 'group-id@g.us'; // Extract from response
+await client.addGroupParticipants(groupId, {
+  participants: ['1111111111@c.us']
+});
+
+// Promote to admin
+await client.promoteGroupParticipant(groupId, {
+  participants: ['1234567890@c.us']
 });
 ```
 
