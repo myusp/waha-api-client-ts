@@ -7,14 +7,22 @@
   "scripts": {
     "build": "tsc",
     "test": "tsx src/example.ts",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "docs": "typedoc src/index.ts --out docs --excludePrivate --excludeInternal"
   },
-  "keywords": ["waha", "api", "client", "whatsapp", "typescript"],
+  "keywords": [
+    "waha",
+    "api",
+    "client",
+    "whatsapp",
+    "typescript"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^24.7.2",
     "tsx": "^4.20.6",
+    "typedoc": "^0.28.14",
     "typescript": "^5.9.3"
   }
 }
