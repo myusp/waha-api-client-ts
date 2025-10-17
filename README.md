@@ -17,13 +17,84 @@ TypeScript client library for [WAHA (WhatsApp HTTP API)](https://github.com/devl
 - 🚀 **Easy to Use**: Simple and intuitive API
 - 🛡️ **Safe Send Methods**: Built-in number verification to prevent blocking
 
-> **📚 Type System**: See [TYPE_SYSTEM.md](./TYPE_SYSTEM.md) for detailed documentation on types and how they're generated from the OpenAPI schema.
-
 ## Installation
 
 ```bash
 npm install waha-api-client-ts
 ```
+
+## Bundles and Compatibility
+
+This package ships multiple bundle formats so it works both in Node.js and in web browsers:
+
+- dist/index.cjs.js — CommonJS (Node require)
+- dist/index.esm.js — ES Module (Node & modern bundlers)
+- dist/index.cjs.min.js / dist/index.esm.min.js — Minified versions
+- dist/index.umd.js / dist/index.umd.min.js — UMD bundle for browsers (script tag / CDN)
+
+The package.json `browser` and `unpkg` entry point point to the UMD minified bundle for CDN usage.
+
+## Usage
+
+### Node (ESM import)
+
+```js
+import { WAHAClient } from 'waha-api-client-ts';
+
+const client = new WAHAClient({ baseURL: 'https://your-waha-instance.com' });
+```
+
+### Node (CommonJS require)
+
+```js
+const { WAHAClient } = require('waha-api-client-ts');
+const client = new WAHAClient({ baseURL: 'https://your-waha-instance.com' });
+```
+
+### Browser (ES Module)
+
+If your app supports ES modules in the browser, you can import the ESM build directly from a bundler or local server:
+
+```html
+<script type="module">
+  import { WAHAClient } from '/node_modules/waha-api-client-ts/dist/index.esm.js';
+  const client = new WAHAClient({ baseURL: 'https://your-waha-instance.com' });
+  // use client...
+</script>
+```
+
+### Browser (UMD Global via CDN or local file)
+
+Include the UMD bundle and access the library via the global name (package name or `WAHA`):
+
+```html
+<script src="https://unpkg.com/waha-api-client-ts@latest/dist/index.umd.min.js"></script>
+<script>
+  // If package name is not a valid JS identifier the global is also available as 'WAHA'
+  const client = (window.WAHA || window['waha-api-client-ts']).WAHAClient
+    ? new (window.WAHA || window['waha-api-client-ts']).WAHAClient({ baseURL: 'https://...' })
+    : null;
+  // use client...
+</script>
+```
+
+## Development & Building
+
+Types are generated from the included OpenAPI specification. Regenerate types and build the library with:
+
+```bash
+# regenerate types from OpenAPI
+npm run generate:types
+
+# build all bundles (CJS/ESM/UMD + d.ts)
+npm run build
+
+# or build only browser-targeted bundles
+npm run build:browser
+```
+
+The build process will output files to `dist/` including `index.d.ts` for TypeScript consumers.
+
 
 ## Quick Start
 
@@ -265,6 +336,15 @@ This client implements all 147 WAHA API endpoints organized into the following c
 - `star()` - Star/unstar message
 - `getMessages()` / `getMessagesAlt()` - Get messages
 - `checkNumberStatus()` - Check if number is on WhatsApp
+
+## Migration / Compatibility notes
+
+We made the client follow the OpenAPI canonical endpoints for sending messages. Concretely:
+
+- The library now uses the documented POST endpoints such as `POST /api/sendText`, `POST /api/sendImage`, `POST /api/sendFile`, `POST /api/sendVoice`, and `POST /api/sendVideo` and includes the required `session` field in the request body when calling those endpoints.
+- Legacy/alternative helpers (for example `sendTextGet()`, `getMessagesAlt()`, `sendTextAlt()`) remain in the client for backwards compatibility but are annotated as deprecated in the source. Prefer the modern methods such as `sendText()` and `getMessages(chatId)`.
+
+If you previously relied on internal session-prefixed send URLs (e.g. `/api/{session}/messages/text`), update your calls to use the canonical methods above. If you need the library to retain automatic fallback to legacy endpoints (try canonical first, fallback to legacy), tell me and I can add graceful retry/fallback behavior.
 
 ### 💬 Chat Management (16 methods)
 - `getChats()` - Get all chats

@@ -5,19 +5,23 @@
   "description": "Waha Api Client TS for https://github.com/devlikeapro/waha (unofficial)",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.min.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/index.esm.js",
       "require": "./dist/index.cjs.js",
+      "browser": "./dist/index.umd.min.js",
       "types": "./dist/index.d.ts"
     }
   },
+  "unpkg": "dist/index.umd.min.js",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "rollup -c",
+  "build": "rollup -c",
+  "build:browser": "rollup -c --environment TARGET:browser",
     "build:watch": "rollup -c --watch",
     "test": "tsx example/index.ts",
     "prepare": "npm run build",

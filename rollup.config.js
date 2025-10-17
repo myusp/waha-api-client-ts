@@ -7,8 +7,8 @@ import { readFileSync } from 'fs';
 
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
 
-// Main build configuration
-const buildConfig = {
+// Node-targeted build configuration (CJS + ESM)
+const nodeBuildConfig = {
   input: 'src/index.ts',
   external: [], // No external dependencies - uses native fetch API
   output: [
@@ -37,6 +37,7 @@ const buildConfig = {
   ],
   plugins: [
     resolve({
+      // Node-first resolution for these builds
       browser: false,
       preferBuiltins: true,
     }),
@@ -44,6 +45,44 @@ const buildConfig = {
     typescript({
       tsconfig: './tsconfig.json',
       declaration: false, // We'll generate types separately
+      declarationMap: false,
+      sourceMap: true,
+    }),
+  ],
+};
+
+// Browser-targeted build configuration (UMD).
+// Produces a UMD bundle suitable for <script> inclusion and CDN usage.
+const browserBuildConfig = {
+  input: 'src/index.ts',
+  external: [],
+  output: [
+    {
+      file: 'dist/index.umd.js',
+      format: 'umd',
+      name: packageJson.name || 'WAHA',
+      sourcemap: true,
+      globals: {},
+    },
+    {
+      file: 'dist/index.umd.min.js',
+      format: 'umd',
+      name: packageJson.name || 'WAHA',
+      sourcemap: true,
+      plugins: [terser()],
+      globals: {},
+    },
+  ],
+  plugins: [
+    // For browser bundles prefer browser field and do not prefer builtins
+    resolve({
+      browser: true,
+      preferBuiltins: false,
+    }),
+    commonjs(),
+    typescript({
+      tsconfig: './tsconfig.json',
+      declaration: false,
       declarationMap: false,
       sourceMap: true,
     }),
@@ -60,4 +99,4 @@ const dtsConfig = {
   plugins: [dts()],
 };
 
-export default [buildConfig, dtsConfig];
+export default [nodeBuildConfig, browserBuildConfig, dtsConfig];
