@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.0](https://github.com/myusp/waha-api-client-ts/compare/v1.0.2...v1.1.0) (2025-10-17)
+
+
+### Features
+
+* enhance WAHAClient with canonical API endpoints and improved type safety ([8d97737](https://github.com/myusp/waha-api-client-ts/commit/8d97737b2fffce4a0995cdf0d6d0a50e72a02edd))
+* enhance WAHAClient with canonical API endpoints and improved type safety ([38df570](https://github.com/myusp/waha-api-client-ts/commit/38df5707d1ebfc62819d2938dd0c47f4191c9110))
+
 ## [1.0.2](https://github.com/myusp/waha-api-client-ts/compare/v1.0.1...v1.0.2) (2025-10-16)
 
 
