@@ -22,7 +22,9 @@
     "test": "tsx example/index.ts",
     "prepare": "npm run build",
     "docs": "typedoc src/index.ts --out docs --excludePrivate --excludeInternal",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "generate:types": "npx sta generate -p waha-openapi.json -o src/generated -n waha-schema.ts --no-client --type-suffix=Schema",
+    "prebuild": "npm run generate:types"
   },
   "keywords": [
     "waha",
@@ -43,8 +45,10 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^24.7.2",
+    "openapi-typescript": "^7.10.1",
     "rollup": "^4.52.4",
     "rollup-plugin-dts": "^6.2.3",
+    "swagger-typescript-api": "^13.2.15",
     "terser": "^5.44.0",
     "tslib": "^2.8.1",
     "tsx": "^4.20.6",
