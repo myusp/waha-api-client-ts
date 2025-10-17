@@ -7,14 +7,17 @@ TypeScript client library for [WAHA (WhatsApp HTTP API)](https://github.com/devl
 ## Features
 
 - ✅ **Complete API Coverage**: All 147 WAHA API endpoints implemented
-- 🌐 **Universal Compatibility**: Works in both Node.js and browser environments
+- � **Auto-Generated Types**: 200+ TypeScript types generated from OpenAPI schema
+- �🌐 **Universal Compatibility**: Works in both Node.js and browser environments
 - 🚫 **Zero Dependencies**: No axios or other HTTP libraries - uses native fetch API
 - 🔑 **Default Configuration**: Set API key, base URL, and default session on initialization
 - 🔄 **Config Override**: Override session, timeout, retry attempts, and retry delay per API call
 - 🔁 **Automatic Retries**: Built-in retry logic with configurable attempts and delays
-- 📝 **TypeScript**: Fully typed with TypeScript for better development experience
+- 📝 **Fully Typed**: Complete TypeScript support with JSDoc comments
 - 🚀 **Easy to Use**: Simple and intuitive API
 - 🛡️ **Safe Send Methods**: Built-in number verification to prevent blocking
+
+> **📚 Type System**: See [TYPE_SYSTEM.md](./TYPE_SYSTEM.md) for detailed documentation on types and how they're generated from the OpenAPI schema.
 
 ## Installation
 

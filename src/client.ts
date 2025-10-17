@@ -4,11 +4,24 @@ import {
   SendTextParams,
   SendImageParams,
   SendFileParams,
-  SessionInfo,
-  ChatInfo,
-  MessageInfo,
   APIResponse,
 } from './types';
+
+import {
+  SessionInfoSchema as SessionInfo,
+  ChatSummarySchema as ChatSummary,
+  ChatPictureResponseSchema as ChatPictureResponse,
+  MeInfoSchema as MeInfo,
+  WAMessageSchema as WAMessage,
+  SessionDTOSchema as SessionDTO,
+  WANumberExistResultSchema as WANumberExistResult,
+  Base64FileSchema as Base64File,
+  QRCodeValueSchema as QRCodeValue,
+} from './schema-types';
+
+// Type aliases for convenience
+type ChatInfo = ChatSummary;
+type MessageInfo = WAMessage;
 
 /**
  * WAHA API Client
@@ -173,11 +186,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async sendText(params: SendTextParams): Promise<APIResponse<MessageInfo>> {
+  async sendText(params: SendTextParams): Promise<WAMessage> {
     const { chatId, text, reply_to, config } = params;
     const mergedConfig = this.mergeConfig(config);
     
-    return this.request<APIResponse<MessageInfo>>(
+    return this.request<WAMessage>(
       'POST',
       `/api/${mergedConfig.session}/messages/text`,
       {
@@ -220,11 +233,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async sendImage(params: SendImageParams): Promise<APIResponse<MessageInfo>> {
+  async sendImage(params: SendImageParams): Promise<WAMessage> {
     const { chatId, file, caption, reply_to, config } = params;
     const mergedConfig = this.mergeConfig(config);
     
-    return this.request<APIResponse<MessageInfo>>(
+    return this.request<WAMessage>(
       'POST',
       `/api/${mergedConfig.session}/messages/image`,
       {
@@ -270,11 +283,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async sendFile(params: SendFileParams): Promise<APIResponse<MessageInfo>> {
+  async sendFile(params: SendFileParams): Promise<WAMessage> {
     const { chatId, file, filename, caption, reply_to, config } = params;
     const mergedConfig = this.mergeConfig(config);
     
-    return this.request<APIResponse<MessageInfo>>(
+    return this.request<WAMessage>(
       'POST',
       `/api/${mergedConfig.session}/messages/file`,
       {
@@ -342,10 +355,10 @@ export class WAHAClient {
    * const qr = await client.getQR();
    * ```
    */
-  async startSession(config?: RequestConfig): Promise<SessionInfo> {
+  async startSession(config?: RequestConfig): Promise<SessionDTO> {
     const mergedConfig = this.mergeConfig(config);
     
-    return this.request<SessionInfo>(
+    return this.request<SessionDTO>(
       'POST',
       `/api/sessions/start`,
       {
@@ -374,10 +387,10 @@ export class WAHAClient {
    * });
    * ```
    */
-  async stopSession(config?: RequestConfig): Promise<APIResponse> {
+  async stopSession(config?: RequestConfig): Promise<SessionDTO> {
     const mergedConfig = this.mergeConfig(config);
     
-    return this.request<APIResponse>(
+    return this.request<SessionDTO>(
       'POST',
       `/api/sessions/stop`,
       {
@@ -408,8 +421,8 @@ export class WAHAClient {
    * const activeSessions = sessions.filter(s => s.status === 'WORKING');
    * ```
    */
-  async getSessions(config?: RequestConfig): Promise<SessionInfo[]> {
-    return this.request<SessionInfo[]>(
+  async getSessions(config?: RequestConfig): Promise<SessionDTO[]> {
+    return this.request<SessionDTO[]>(
       'GET',
       `/api/sessions`,
       undefined,
@@ -471,10 +484,10 @@ export class WAHAClient {
    * const groupMessages = await client.getMessages('groupId@g.us');
    * ```
    */
-  async getMessages(chatId: string, config?: RequestConfig): Promise<MessageInfo[]> {
+  async getMessages(chatId: string, config?: RequestConfig): Promise<WAMessage[]> {
     const mergedConfig = this.mergeConfig(config);
     
-    return this.request<MessageInfo[]>(
+    return this.request<WAMessage[]>(
       'GET',
       `/api/${mergedConfig.session}/chats/${chatId}/messages`,
       undefined,
@@ -522,10 +535,11 @@ export class WAHAClient {
   async checkNumberStatus(
     phone: string,
     config?: RequestConfig
-  ): Promise<{ exists: boolean; numberExists?: boolean }> {
+  ): Promise<WANumberExistResult> {
     const mergedConfig = this.mergeConfig(config);
-    
-    return this.request<{ exists: boolean; numberExists?: boolean }>(
+
+    // Newer endpoint is /contacts/check-exists; keep calling the older endpoint if present
+    return this.request<WANumberExistResult>(
       'GET',
       `/api/checkNumberStatus`,
       undefined,
@@ -599,11 +613,11 @@ export class WAHAClient {
    * }
    * ```
    */
-  async safeSendText(params: SendTextParams): Promise<APIResponse<MessageInfo> | null> {
+  async safeSendText(params: SendTextParams): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(params.chatId);
     const statusResult = await this.checkNumberStatus(phone, params.config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -669,11 +683,11 @@ export class WAHAClient {
    * }
    * ```
    */
-  async safeSendImage(params: SendImageParams): Promise<APIResponse<MessageInfo> | null> {
+  async safeSendImage(params: SendImageParams): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(params.chatId);
     const statusResult = await this.checkNumberStatus(phone, params.config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -737,11 +751,11 @@ export class WAHAClient {
    * }
    * ```
    */
-  async safeSendFile(params: SendFileParams): Promise<APIResponse<MessageInfo> | null> {
+  async safeSendFile(params: SendFileParams): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(params.chatId);
     const statusResult = await this.checkNumberStatus(phone, params.config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -802,11 +816,11 @@ export class WAHAClient {
    * }
    * ```
    */
-  async safeSendVoice(data: any, config?: RequestConfig): Promise<any | null> {
+  async safeSendVoice(data: any, config?: RequestConfig): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
     const statusResult = await this.checkNumberStatus(phone, config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -856,11 +870,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async safeSendVideo(data: any, config?: RequestConfig): Promise<any | null> {
+  async safeSendVideo(data: any, config?: RequestConfig): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
     const statusResult = await this.checkNumberStatus(phone, config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -911,11 +925,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async safeSendLocation(data: any, config?: RequestConfig): Promise<any | null> {
+  async safeSendLocation(data: any, config?: RequestConfig): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
     const statusResult = await this.checkNumberStatus(phone, config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -965,11 +979,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async safeSendContactVcard(data: any, config?: RequestConfig): Promise<any | null> {
+  async safeSendContactVcard(data: any, config?: RequestConfig): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
     const statusResult = await this.checkNumberStatus(phone, config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -1019,11 +1033,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async safeSendLinkPreview(data: any, config?: RequestConfig): Promise<any | null> {
+  async safeSendLinkPreview(data: any, config?: RequestConfig): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
     const statusResult = await this.checkNumberStatus(phone, config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -1076,11 +1090,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async safeSendButtons(data: any, config?: RequestConfig): Promise<any | null> {
+  async safeSendButtons(data: any, config?: RequestConfig): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
     const statusResult = await this.checkNumberStatus(phone, config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -1137,11 +1151,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async safeSendList(data: any, config?: RequestConfig): Promise<any | null> {
+  async safeSendList(data: any, config?: RequestConfig): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
     const statusResult = await this.checkNumberStatus(phone, config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -1191,11 +1205,11 @@ export class WAHAClient {
    * });
    * ```
    */
-  async safeSendPoll(data: any, config?: RequestConfig): Promise<any | null> {
+  async safeSendPoll(data: any, config?: RequestConfig): Promise<WAMessage | null> {
     const phone = this.extractPhoneFromChatId(data.chatId);
     const statusResult = await this.checkNumberStatus(phone, config);
     
-    if (!statusResult.exists && !statusResult.numberExists) {
+    if (!statusResult.numberExists) {
       return null;
     }
     
@@ -1246,14 +1260,29 @@ export class WAHAClient {
    * const qrData = await client.getQR('raw');
    * ```
    */
-  async getQR(format: 'image' | 'raw' = 'image', config?: RequestConfig): Promise<any> {
+  async getQR(format: 'image' | 'raw' = 'image', config?: RequestConfig): Promise<Uint8Array | Base64File | QRCodeValue> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>(
+
+    // If the caller wants an image, fetch the binary and return as Buffer
+    if (format === 'image') {
+      const url = `${this.config.baseURL}/api/${mergedConfig.session}/auth/qr?format=image`;
+      const headers: Record<string, string> = {};
+      if (this.config.apiKey) headers['X-Api-Key'] = this.config.apiKey;
+
+      const res = await fetch(url, { method: 'GET', headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status} while fetching QR image`);
+
+      const arrayBuf = await res.arrayBuffer();
+      return new Uint8Array(arrayBuf);
+    }
+
+    // For raw format, return the JSON which is oneOf Base64File | QRCodeValue
+    return this.request<Base64File | QRCodeValue>(
       'GET',
       `/api/${mergedConfig.session}/auth/qr`,
       undefined,
       config,
-      { format }
+      { format: 'raw' }
     );
   }
 
@@ -1281,9 +1310,9 @@ export class WAHAClient {
    * });
    * ```
    */
-  async requestCode(data: { phoneNumber: string; method?: string }, config?: RequestConfig): Promise<any> {
+  async requestCode(data: { phoneNumber: string; method?: string }, config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>(
+    return this.request<APIResponse<any>>(
       'POST',
       `/api/${mergedConfig.session}/auth/request-code`,
       data,
@@ -1371,9 +1400,9 @@ export class WAHAClient {
    * });
    * ```
    */
-  async deleteSession(config?: RequestConfig): Promise<any> {
+  async deleteSession(config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('DELETE', `/api/sessions/${mergedConfig.session}`, undefined, config);
+    return this.request<APIResponse<any>>('DELETE', `/api/sessions/${mergedConfig.session}`, undefined, config);
   }
 
   /**
@@ -1393,9 +1422,9 @@ export class WAHAClient {
    * console.log('My name:', me.pushname);
    * ```
    */
-  async getSessionMe(config?: RequestConfig): Promise<any> {
+  async getSessionMe(config?: RequestConfig): Promise<MeInfo> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('GET', `/api/sessions/${mergedConfig.session}/me`, undefined, config);
+    return this.request<MeInfo>('GET', `/api/sessions/${mergedConfig.session}/me`, undefined, config);
   }
 
   /**
@@ -1414,9 +1443,9 @@ export class WAHAClient {
   /**
    * Stop a session (alternative endpoint)
    */
-  async stopSessionAlt(config?: RequestConfig): Promise<any> {
+  async stopSessionAlt(config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>(
+    return this.request<APIResponse<any>>(
       'POST',
       `/api/sessions/${mergedConfig.session}/stop`,
       undefined,
@@ -1427,9 +1456,9 @@ export class WAHAClient {
   /**
    * Logout from a session
    */
-  async logoutSession(config?: RequestConfig): Promise<any> {
+  async logoutSession(config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>(
+    return this.request<APIResponse<any>>(
       'POST',
       `/api/sessions/${mergedConfig.session}/logout`,
       undefined,
@@ -1440,16 +1469,16 @@ export class WAHAClient {
   /**
    * Logout from a session (bulk operation)
    */
-  async logoutSessionBulk(data: { name: string }, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sessions/logout', data, config);
+  async logoutSessionBulk(data: { name: string }, config?: RequestConfig): Promise<APIResponse<any>> {
+    return this.request<APIResponse<any>>('POST', '/api/sessions/logout', data, config);
   }
 
   /**
    * Restart a session
    */
-  async restartSession(config?: RequestConfig): Promise<any> {
+  async restartSession(config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>(
+    return this.request<APIResponse<any>>(
       'POST',
       `/api/sessions/${mergedConfig.session}/restart`,
       undefined,
@@ -1462,41 +1491,41 @@ export class WAHAClient {
   /**
    * Get my profile
    */
-  async getProfile(config?: RequestConfig): Promise<any> {
+  async getProfile(config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('GET', `/api/${mergedConfig.session}/profile`, undefined, config);
+    return this.request<APIResponse<any>>('GET', `/api/${mergedConfig.session}/profile`, undefined, config);
   }
 
   /**
    * Set profile name
    */
-  async setProfileName(data: { name: string }, config?: RequestConfig): Promise<any> {
+  async setProfileName(data: { name: string }, config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('PUT', `/api/${mergedConfig.session}/profile/name`, data, config);
+    return this.request<APIResponse<any>>('PUT', `/api/${mergedConfig.session}/profile/name`, data, config);
   }
 
   /**
    * Set profile status (About)
    */
-  async setProfileStatus(data: { status: string }, config?: RequestConfig): Promise<any> {
+  async setProfileStatus(data: { status: string }, config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('PUT', `/api/${mergedConfig.session}/profile/status`, data, config);
+    return this.request<APIResponse<any>>('PUT', `/api/${mergedConfig.session}/profile/status`, data, config);
   }
 
   /**
    * Set profile picture
    */
-  async setProfilePicture(data: { file: string }, config?: RequestConfig): Promise<any> {
+  async setProfilePicture(data: { file: string }, config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('PUT', `/api/${mergedConfig.session}/profile/picture`, data, config);
+    return this.request<APIResponse<any>>('PUT', `/api/${mergedConfig.session}/profile/picture`, data, config);
   }
 
   /**
    * Delete profile picture
    */
-  async deleteProfilePicture(config?: RequestConfig): Promise<any> {
+  async deleteProfilePicture(config?: RequestConfig): Promise<APIResponse<any>> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('DELETE', `/api/${mergedConfig.session}/profile/picture`, undefined, config);
+    return this.request<APIResponse<any>>('DELETE', `/api/${mergedConfig.session}/profile/picture`, undefined, config);
   }
 
   // ==================== 📤 Chatting - Extended Methods ====================
@@ -1504,14 +1533,14 @@ export class WAHAClient {
   /**
    * Send text message (alternative endpoint)
    */
-  async sendTextAlt(data: { chatId: string; text: string; session?: string }, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sendText', data, config);
+  async sendTextAlt(data: { chatId: string; text: string; session?: string }, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/sendText', data, config);
   }
 
   /**
    * Send text message via GET (alternative endpoint)
    */
-  async sendTextGet(chatId: string, text: string, config?: RequestConfig): Promise<any> {
+  async sendTextGet(chatId: string, text: string, config?: RequestConfig): Promise<WAMessage> {
     const mergedConfig = this.mergeConfig(config);
     return this.request<any>(
       'GET',
@@ -1525,57 +1554,57 @@ export class WAHAClient {
   /**
    * Send image (alternative endpoint)
    */
-  async sendImageAlt(data: any, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sendImage', data, config);
+  async sendImageAlt(data: any, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/sendImage', data, config);
   }
 
   /**
    * Send file (alternative endpoint)
    */
-  async sendFileAlt(data: any, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sendFile', data, config);
+  async sendFileAlt(data: any, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/sendFile', data, config);
   }
 
   /**
    * Send voice message
    */
-  async sendVoice(data: any, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sendVoice', data, config);
+  async sendVoice(data: any, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/sendVoice', data, config);
   }
 
   /**
    * Send video message
    */
-  async sendVideo(data: any, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sendVideo', data, config);
+  async sendVideo(data: any, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/sendVideo', data, config);
   }
 
   /**
    * Send link with custom preview
    */
-  async sendLinkCustomPreview(data: any, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/send/link-custom-preview', data, config);
+  async sendLinkCustomPreview(data: any, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/send/link-custom-preview', data, config);
   }
 
   /**
    * Send buttons
    */
-  async sendButtons(data: any, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sendButtons', data, config);
+  async sendButtons(data: any, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/sendButtons', data, config);
   }
 
   /**
    * Send list message
    */
-  async sendList(data: any, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sendList', data, config);
+  async sendList(data: any, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/sendList', data, config);
   }
 
   /**
    * Forward message
    */
-  async forwardMessage(data: any, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/forwardMessage', data, config);
+  async forwardMessage(data: any, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/forwardMessage', data, config);
   }
 
   /**
@@ -1604,8 +1633,8 @@ export class WAHAClient {
    * });
    * ```
    */
-  async sendSeen(data: { chatId: string; messageId?: string }, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sendSeen', data, config);
+  async sendSeen(data: { chatId: string; messageId?: string }, config?: RequestConfig): Promise<APIResponse<any>> {
+    return this.request<APIResponse<any>>('POST', '/api/sendSeen', data, config);
   }
 
   /**
@@ -1636,8 +1665,8 @@ export class WAHAClient {
    * });
    * ```
    */
-  async startTyping(data: { chatId: string }, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/startTyping', data, config);
+  async startTyping(data: { chatId: string }, config?: RequestConfig): Promise<APIResponse<any>> {
+    return this.request<APIResponse<any>>('POST', '/api/startTyping', data, config);
   }
 
   /**
@@ -1669,22 +1698,22 @@ export class WAHAClient {
    * });
    * ```
    */
-  async stopTyping(data: { chatId: string }, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/stopTyping', data, config);
+  async stopTyping(data: { chatId: string }, config?: RequestConfig): Promise<APIResponse<any>> {
+    return this.request<APIResponse<any>>('POST', '/api/stopTyping', data, config);
   }
 
   /**
    * React to a message
    */
-  async reaction(data: { chatId: string; messageId: string; reaction: string }, config?: RequestConfig): Promise<any> {
-    return this.request<any>('PUT', '/api/reaction', data, config);
+  async reaction(data: { chatId: string; messageId: string; reaction: string }, config?: RequestConfig): Promise<APIResponse<any>> {
+    return this.request<APIResponse<any>>('PUT', '/api/reaction', data, config);
   }
 
   /**
    * Star/unstar a message
    */
-  async star(data: { chatId: string; messageId: string; star: boolean }, config?: RequestConfig): Promise<any> {
-    return this.request<any>('PUT', '/api/star', data, config);
+  async star(data: { chatId: string; messageId: string; star: boolean }, config?: RequestConfig): Promise<APIResponse<any>> {
+    return this.request<APIResponse<any>>('PUT', '/api/star', data, config);
   }
 
   /**
@@ -1725,14 +1754,14 @@ export class WAHAClient {
   /**
    * Get messages
    */
-  async getMessagesAlt(chatId?: string, limit?: number, downloadMedia?: boolean, config?: RequestConfig): Promise<any> {
+  async getMessagesAlt(chatId?: string, limit?: number, downloadMedia?: boolean, config?: RequestConfig): Promise<WAMessage[]> {
     const mergedConfig = this.mergeConfig(config);
     const params: Record<string, any> = { session: mergedConfig.session };
     if (chatId) params.chatId = chatId;
     if (limit !== undefined) params.limit = limit;
     if (downloadMedia !== undefined) params.downloadMedia = downloadMedia;
     
-    return this.request<any>('GET', '/api/messages', undefined, config, params);
+    return this.request<WAMessage[]>('GET', '/api/messages', undefined, config, params);
   }
 
   /**
@@ -1745,8 +1774,8 @@ export class WAHAClient {
   /**
    * Send link preview
    */
-  async sendLinkPreview(data: any, config?: RequestConfig): Promise<any> {
-    return this.request<any>('POST', '/api/sendLinkPreview', data, config);
+  async sendLinkPreview(data: any, config?: RequestConfig): Promise<WAMessage> {
+    return this.request<WAMessage>('POST', '/api/sendLinkPreview', data, config);
   }
 
   // ==================== 💬 Chats Management ====================
@@ -1754,17 +1783,17 @@ export class WAHAClient {
   /**
    * Get chats overview
    */
-  async getChatsOverview(config?: RequestConfig): Promise<any> {
+  async getChatsOverview(config?: RequestConfig): Promise<ChatSummary[]> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('GET', `/api/${mergedConfig.session}/chats/overview`, undefined, config);
+    return this.request<ChatSummary[]>('GET', `/api/${mergedConfig.session}/chats/overview`, undefined, config);
   }
 
   /**
    * Create chats overview
    */
-  async createChatsOverview(data: any, config?: RequestConfig): Promise<any> {
+  async createChatsOverview(data: any, config?: RequestConfig): Promise<ChatSummary> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('POST', `/api/${mergedConfig.session}/chats/overview`, data, config);
+    return this.request<ChatSummary>('POST', `/api/${mergedConfig.session}/chats/overview`, data, config);
   }
 
   /**
@@ -1778,9 +1807,10 @@ export class WAHAClient {
   /**
    * Get chat picture
    */
-  async getChatPicture(chatId: string, config?: RequestConfig): Promise<any> {
+  async getChatPicture(chatId: string, config?: RequestConfig): Promise<ChatPictureResponse | Uint8Array> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('GET', `/api/${mergedConfig.session}/chats/${chatId}/picture`, undefined, config);
+    // The endpoint may return JSON (with a URL) or raw binary. Keep the union type.
+    return this.request<ChatPictureResponse | Uint8Array>('GET', `/api/${mergedConfig.session}/chats/${chatId}/picture`, undefined, config);
   }
 
   /**
@@ -2105,9 +2135,9 @@ export class WAHAClient {
   /**
    * Get chats by label
    */
-  async getChatsByLabel(labelId: string, config?: RequestConfig): Promise<any> {
+  async getChatsByLabel(labelId: string, config?: RequestConfig): Promise<ChatSummary[]> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>('GET', `/api/${mergedConfig.session}/labels/${labelId}/chats`, undefined, config);
+    return this.request<ChatSummary[]>('GET', `/api/${mergedConfig.session}/labels/${labelId}/chats`, undefined, config);
   }
 
   // ==================== 👤 Contacts Management ====================
@@ -2143,9 +2173,9 @@ export class WAHAClient {
   /**
    * Check if contact exists
    */
-  async checkContactExists(phone: string, config?: RequestConfig): Promise<any> {
+  async checkContactExists(phone: string, config?: RequestConfig): Promise<WANumberExistResult> {
     const mergedConfig = this.mergeConfig(config);
-    return this.request<any>(
+    return this.request<WANumberExistResult>(
       'GET',
       '/api/contacts/check-exists',
       undefined,
